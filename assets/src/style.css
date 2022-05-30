@@ -1,0 +1,195 @@
+body, html {
+    margin:0;
+    overflow: hidden;
+    font-size: 16px;
+}
+
+img {
+    height: auto;
+    width: auto;
+    object-fit: contain;
+    object-position: top center;
+}
+
+.objCover {
+    object-fit: cover;
+}
+
+#ar-button {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    width: 6.5rem; 
+}
+
+#ar-button img {
+    width: 100%;
+    /* width: 4.5rem; */
+}
+
+.QRcode {
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    left: 5vw;
+    top: 18vh;
+    display: none;
+    border: 2px solid #000;
+    background-color: #ffff;
+    padding: 0.5rem;
+    max-width: 11rem;
+}
+
+.QRcode h1 {
+    font-weight: bold;
+    color: #000;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.QRcode p {
+    margin: 0.8rem 0;
+    color: #000;
+    font-size: 1rem;
+}
+
+.QRcode img {
+    width: 65%;
+}
+
+.closeQRcode {
+    display: flex;
+    justify-content: center;
+    background-color: rgba(202, 202, 202, 0.952);
+    text-decoration: none;
+    padding: .4rem 2rem;
+    z-index: 1;
+    width: 3rem;
+    border-radius: 7.7px;
+    color:#000;
+    margin: auto;
+    margin-top: 0.3rem;
+}
+
+.loadingContent {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: rgb(74, 144, 226);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.loading {
+    width: 270px;
+    height: 8px;
+    border-radius: 6.5px;
+    background-color: #fff;
+    margin-bottom: 11px;
+}
+
+.loading .barBlue {
+    position: absolute;
+    height: 8px;
+    width: 0;
+    border-radius: 6.5px;
+    background-color: rgb(74, 144, 226);
+}
+
+.model,
+#container3d_replace {
+    width: 100vw;
+    height: 70vh;
+}
+
+.drag-and-scroll {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+}
+
+.drag-and-scroll-image {
+    width: 10rem;
+    height: auto;
+    animation-name: drag-and-scroll;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-name: drag-and-scroll;
+    -webkit-animation-duration:2s;
+    -webkit-animation-timing-function: linear;
+}
+
+.drag-and-scroll-p {
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    color: #4F4E4F;
+}
+
+@keyframes drag-and-scroll {
+    0%   {-webkit-transform: translate(0, 0);}
+    25%  {-webkit-transform: translate(-2rem, 0);}
+    50%  {-webkit-transform: translate(0, 0);}
+    75%  {-webkit-transform: translate(2rem, 0);}
+    100% {-webkit-transform: translate(0, 0);}
+}
+
+@-webkit-keyframes drag-and-scroll {
+    0%   {-webkit-transform: translate(0, 0);}
+    25%  {-webkit-transform: translate(-2rem, 0);}
+    50%  {-webkit-transform: translate(0, 0);}
+    75%  {-webkit-transform: translate(2rem, 0);}
+    100% {-webkit-transform: translate(0, 0);}
+}
+
+@media (max-width: 1399px) {
+	html, body {
+		font-size: 15px;
+    }
+}
+
+@media (max-width: 1199px) {
+	html, body {
+		font-size: 14px;
+    }    
+}
+
+@media (max-width: 991px) {
+	html, body {
+		font-size: 13px;
+    }    
+}
+
+@media (max-width: 767px) {
+	html, body {
+		font-size: 12px;
+    }    
+}
+
+@media (max-width: 575px) {
+    html, body {
+		font-size: 10px;
+    }
+
+    #ar-button,
+    #ar-button img {
+        width: 4rem;
+    }
+
+    .QRcode {
+        left: 11vw;
+        top: 21vh;
+    }
+}
+
+@media (max-width: 360px) {
+    
+}
