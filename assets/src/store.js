@@ -10,7 +10,7 @@ class Store {
     })
   }
 
-  set stateCallbacks(callback) {
+  setStateCallback(callback) {
     this._stateCallbacks = [...this._stateCallbacks, callback];
   }
 
