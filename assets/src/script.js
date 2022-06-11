@@ -3,9 +3,9 @@ let flagInterract = true;
 
 const baseOptions1 = {
   distID: "latest",
-  solution3DName: "PA001 TA",
+  solution3DName: "sa-001-tc-chart",
   projectName: "first-project",
-  solution3DID: "42134",
+  solution3DID: "42489",
   containerID: "container3d_replace",
 };
 
@@ -52,8 +52,8 @@ window.onload = async () => {
     selectedBottom: threedium.parts.find((part) =>
       part.startsWith("[bottom](01)")
     ),
-    selectedTopMaterial: null,
-    selectedBottomMaterial: null,
+    selectedTopMaterials: [],
+    selectedBottomMaterials: [],
     parts: threedium.parts,
     materials: threedium.materials,
     blockedMaterials: [],
@@ -73,78 +73,171 @@ window.onload = async () => {
     bottomMaterialContainer.innerHTML = '';
   }
 
-  const handlePartInput = ({ id }) => {
-    const partType = id.slice(0, id.indexOf(']') + 1);
+  const handlePartInput = ({target: { id }}) => {
+    const partType = id.slice(id.indexOf('[') + 1, id.indexOf(']'));
     const capitalizedPartType = partType.replace(/^\w/, (c) => c.toUpperCase());
-    store.setState({[ `selected${capitalizedPartType}`]: id })
-    
+    store.setState({[`selected${capitalizedPartType}`]: id })
   }
+
+  const genericCreatePartsButtons = (parts, container, selected) => {
+    parts.forEach((name) => {
+      const label = document.createElement("label");
+      label.htmlFor = name;
+      label.innerText = name;
+      
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.id = name;
+      input.onchange = handlePartInput;
+      
+      if (name === selected) {
+        input.checked = true;
+        input.disabled = true;
+      }
+      
+      label.appendChild(input);
+      container.appendChild(label);
+    });
+  };
 
   const createPartsButtons = () => {
     const { state: { parts, selectedTop, selectedBottom } } = store;
     const topParts = parts.filter((part) => part.startsWith('[top]'));
     const bottomParts = parts.filter((part) => part.startsWith('[bottom]'));
     
-    topParts.forEach(({ name }) => {
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.id = name;
-      input.onchange = handlePartInput;
-      if (name === selectedTop) {
-        input.checked = true;
-        input.disabled = true;
-      }
-      topPartContainer.appendChild(input);
-    });
+    genericCreatePartsButtons(topParts, topPartContainer, selectedTop);
     
-    bottomParts.forEach(({ name }) => {
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.id = name;
-      input.onchange = handlePartInput;
-      if (name === selectedBottom) {
-        input.checked = true;
-        input.disabled = true;
-      }
-      bottomPartContainer.appendChild(input);
-    });
-  
+    genericCreatePartsButtons(bottomParts, bottomPartContainer, selectedBottom);
   }
 
-  const createMaterialsButtons = () => {
-    const { state: { materials, selectedTop, selectedBottom } } = store;
-    
-    const topMaterials = materials.filter(
-      (material) => material.startsWith(selectedTop.slice(0, selectedTop.indexOf(')') + 1))
-    );
-    
-    const bottomMaterials = materials.filter(
-      (material) => material.startsWith(selectedBottom.slice(0, selectedBottom.indexOf(')') + 1))
-    );
-    
-    
-    
+  const getSubParts = (selectedPart) => {
+    const { state: { parts } } = store;
+    const partType = selectedPart.slice(0, selectedPart.indexOf("]") + 1);
+    let subParts = [];
+
+    if (selectedPart.indexOf("{") !== -1) {
+      subPartsIndex = selectedPart
+        .slice(selectedPart.indexOf("{") + 1, selectedPart.indexOf("}"))
+        .split("-");
+      subParts = parts.filter((part) =>
+        subPartsIndex.some((index) => part.startsWith(`${partType}(${index})`))
+      );
+    }
+
+    return subParts;
   }
 
-  store.setStateCallback(() => {
+  const createMaterialsButtons = (part, container) => {
+    const { state: { materials } } = store;
+    const { applyMaterials } = threedium;
+    const partContainer = document.createElement('div');
+    partContainer.id = part;
+    partContainer.className = 'border border-danger border-2'
+    
+    const filteredMaterials = materials.filter((material) => {
+      const isMaterial = material.includes(part.slice(0, part.indexOf(')') + 1))
+      if (material.match(/{/g)) {
+        const isSubMaterial = material.match(/{/g).length > 1;
+        return isMaterial && !isSubMaterial
+      }
+       
+      return isMaterial
+    });
+
+    filteredMaterials.forEach((material) => {
+      // const label = document.createElement('label');
+      // label.htmlFor = material;
+      // label.innerText = material;
+
+      const buttton = document.createElement('button');
+      buttton.id = material;
+      buttton.innerText = material;
+      buttton.onclick = ({target: { id }}) => applyMaterials(id); 
+      // label.appendChild(input);
+      partContainer.appendChild(buttton);
+    });
+
+    container.appendChild(partContainer);
+  }
+
+  const createMaterialContainers = () => {
+    const {
+      state: { selectedTop, selectedBottom},
+    } = store;
+
+    const topSubParts = getSubParts(selectedTop);
+
+    if(!selectedTop.includes('#')) {
+      createMaterialsButtons(selectedTop, topMaterialContainer);
+    }
+
+    topSubParts.forEach((subPart) => {
+      if (!subPart.includes("#")) {
+        createMaterialsButtons(subPart, topMaterialContainer);
+      }
+    });
+    
+
+    const bottomSubParts = getSubParts(selectedBottom);
+
+    if (!selectedBottom.includes("#")) {
+      createMaterialsButtons(selectedBottom, bottomMaterialContainer);
+    }
+
+    bottomSubParts.forEach((subPart) => {
+      if (!subPart.includes("#")) {
+        createMaterialsButtons(subPart, bottomMaterialContainer);
+      }
+    });
+  }
+
+  const selectParts = async () => {
+    const { selectPart } = threedium;
+    const { state: { selectedTop, selectedBottom } } = store;
+    await selectPart(selectedTop);
+    await selectPart(selectedBottom);
+  }
+
+  store.setStateCallback(async () => {
     clearButtons();
     createPartsButtons();
+    createMaterialContainers();
+    await selectParts();
   });
 
-  document.getElementById("change2").addEventListener("click", () => {
-    console.log(threedium.parts);
-    console.log(threedium.materials);
-
-  });
+  // document.getElementById("change2").addEventListener("click", async () => {
+  //   // console.log(threedium.parts);
+  //   // console.log(threedium.materials);
+  //   console.log(store.state);
+    
+  // });
 
   // document.getElementById("change1").addEventListener("click", async () => {
   //   console.log(threedium);
   // });
+  await store._stateCallback();
 }
 
 
 
 document.getElementById("change1").addEventListener("click", async () => {
+  Unlimited3D.getAvailableCustomParts(function (error, results) {
+    console.log(results);
+  });
+  // Unlimited3D.showParts({
+  //   parts: ["[top](01):PA001_TC001_Mesh"],
+  // });
+  // Unlimited3D.showParts({
+  //   partObjects: [
+  //     {
+  //       parts: [
+  //         "[top](01):PA001_TC001_Mesh",
+  //         "SA 001:[subpart][top](01){2}#[top](01)",
+  //         "SA 001:[subpart][top](01){1}#[top](01)",
+  //       ],
+  //     },
+  //   ],
+  // });
   // Unlimited3D.changeMaterialMap(
   //   { material: "Material01", texture: "Texture01", mapType: "diffuseMap" },
   //   () => {}

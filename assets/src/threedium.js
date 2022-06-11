@@ -2,6 +2,7 @@ class Threedium {
   constructor() {
     this._parts = null;
     this._materials = null;
+    this._original_parts = null;
   }
 
   async init(opt) {
@@ -58,6 +59,8 @@ class Threedium {
         });
         
           this._parts = mappedParts;
+          this._original_parts = result.map(({name}) => name);
+          
       });
     
       Unlimited3D.getAvailableMaterials((e, result) => {
@@ -73,7 +76,7 @@ class Threedium {
     });
   }
 
-  selectPart(part) {
+  selectPart = async (part) => {
     const partType = part.slice(0, part.indexOf(']') + 1);
     let subParts = [];
     
@@ -83,45 +86,146 @@ class Threedium {
         .split("-");
     }
     
-    Unlimited3D.hideParts({ 
-      parts: this._parts.filter(
-        (p) => {
-          const isPart = p.startsWith(partType);
-          const isSubPart = p.startsWith(`[subpart]${partType}`);
-          return (isPart || isSubPart);
-        }) 
+    const partsToHide = this._original_parts.filter(
+      (p) => {
+        const nodePart = p.slice(p.indexOf(":") + 1).trim();
+        const objectPart = p.trim();
+        const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
+        const isPart = actualObj.startsWith(partType)
+        const isSubPart = actualObj.startsWith(`[subpart]${partType}`)
+        return (isPart || isSubPart);
+      }
+    );
+
+    await new Promise((resolve, reject) => {
+      Unlimited3D.hideParts({
+        parts: partsToHide,
+      }, (e) => {
+        if(e) {
+          return reject();
+        }
+        resolve();
+      });
+
     });
 
-    Unlimited3D.showParts({ 
-      parts: this._parts.filter((p) => {
-        const partId = part.slice(0, part.indexOf(')') + 1);
-        const isPart = p === part;
-        const isSubPart = subParts.some((subPart) => p.startsWith(`${partType}(${subPart})`));
-        const isSubNode = p.startsWith(`[subpart]${partId}`);
-        return (isPart || isSubPart || isSubNode);
-      })
+    const partsToShow = this._original_parts.filter((p) => {
+      const partId = part.slice(0, part.indexOf(')') + 1);
+      
+      const nodePart = p.slice(p.indexOf(":") + 1).trim();
+      const objectPart = p.trim();
+      const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
+      
+      const isPart = actualObj.startsWith(part);
+      
+      const isSubPart = subParts.some(
+        (subPart) => actualObj.startsWith(`${partType}(${subPart})`)
+      );
+      
+      const isSubPartOfSubPart = subParts.some(
+        (subPart) => actualObj.startsWith(`[subpart]${partType}(${subPart})`)
+      );
+
+      const isSubNode = actualObj.startsWith(`[subpart]${partId}`);
+      
+      return isPart || isSubPart || isSubNode || isSubPartOfSubPart;
+    });
+
+    await new Promise((resolve, reject) => {
+      Unlimited3D.showParts({
+        partObjects: [
+          {
+            parts: partsToShow
+          },
+        ],
+      }, (e) => {
+        if(e) {
+          return reject()
+        }
+        return resolve();
+      });
     });
   }
 
-  applyMaterials(material) {
-    const MaterialParts = this._parts.filter((part) => {
-      const materialReferenceString = material.slice(0, material.indexOf(')') + 1);
+  applyMaterials = (material) => {
+    const materialReferenceString = material
+      .slice(material.indexOf("|") + 1, material.indexOf(")") + 1)
+      .trim();
+    
+    const materialNumber = material.slice(
+      material.indexOf("{") + 1,
+      material.indexOf("}")
+    ); 
+    // console.log(materialNumber)
+    const materialParts = this._original_parts.filter((part) => {
+      const nodePart = part
+        .slice(part.indexOf(":") + 1)
+        .trim()
+      const objectPart = part.trim();
+      const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
       
-      const isPart = part.startsWith(materialReferenceString);
-      const isDependent = part.includes(`#${materialReferenceString}`);
-      const isSubPart = part.startsWith(`[subpart]${materialReferenceString}`);
+      const isPart = actualObj.startsWith(materialReferenceString);
+      const isDependent = actualObj.includes(`#${materialReferenceString}`);
+      const isSubPart = actualObj.startsWith(`[subpart]${materialReferenceString}`)
       
-      return (isPart || isDependent || isSubPart);
+      return isPart || isDependent || isSubPart;
     });
+
+    const anotherMaterialParts = materialParts.map((part) => {
+      const nodePart = part.slice(part.indexOf(":") + 1).trim();
+      const objectPart = part.trim();
+      const actualObj = objectPart.startsWith('[') ? objectPart : nodePart;
+      return actualObj;
+    }).filter((part) => {
+      const otherMaterialRegex = /\/[0-9]{2}/;
+      return otherMaterialRegex.test(part);
+    });
+
+    const filteredParts = materialParts.filter((p) => {
+      const haveAnotherMaterial = anotherMaterialParts.includes(p);
+      if(!haveAnotherMaterial) {
+        return true;
+      }
+
+      const firstBar = p.indexOf('/');
+      const secondBar = p.indexOf('/', firstBar + 1);
+      const otherMaterials = p.slice(firstBar + 1, secondBar).split('-');
+
+      const isTheMaterialSelected = otherMaterials.includes(materialNumber);
+    
+      return !isTheMaterialSelected;
+    });
+    
+    const changeOtherMaterials = () => {
+      anotherMaterialParts.forEach((p) => {
+        const firstBar = p.indexOf("/");
+        const secondBar = p.indexOf("/", firstBar + 1);
+        const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
+        const partReference = p.slice(p.indexOf('['), firstBar);
+        
+        if(otherMaterials.includes(materialNumber)) {
+          const otherMaterial = this._materials.find((m) =>
+            m.includes(`${partReference}{${materialNumber}}`)
+          );
+          Unlimited3D.changeMaterial({
+            parts: [p],
+            material: otherMaterial,
+          });
+        }
+      });  
+    } 
+
     Unlimited3D.changeMaterial(
       {
-        parts: MaterialParts,
+        parts: filteredParts,
         material,
       },
       (e, _r) => {
-        if(e) {
+        if (e) {
           console.log(e);
+          return 
         }
+        changeOtherMaterials();
       }
     );
   }
