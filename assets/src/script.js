@@ -3,22 +3,55 @@ let flagInterract = true;
 
 const baseOptions1 = {
   distID: "latest",
+  solution3DName: "sa-001-td-chart",
+  projectName: "first-project",
+  solution3DID: "42494",
+  containerID: "container3d_replace",
+};
+
+const baseOptions2 = {
+  distID: "latest",
   solution3DName: "sa-001-tc-chart",
   projectName: "first-project",
   solution3DID: "42489",
   containerID: "container3d_replace",
 };
 
-const baseOptions2 = {
+const baseOptions3 = {
   distID: "latest",
-  solution3DName: "Pants - Example",
+  solution3DName: "pa-002-tc",
   projectName: "first-project",
-  solution3DID: "42152",
+  solution3DID: "42510",
   containerID: "container3d_replace",
 };
 
+const baseOptions4 = {
+  distID: "latest",
+  solution3DName: "pa-002-td",
+  projectName: "first-project",
+  solution3DID: "42519",
+  containerID: "container3d_replace",
+};
+
+const baseOptions5 = {
+  distID: "latest",
+  solution3DName: "sb001-td-chart",
+  projectName: "first-project",
+  solution3DID: "42498",
+  containerID: "container3d_replace",
+};
+
+const baseOptions6 = {
+  distID: "latest",
+  solution3DName: "sb002-tb",
+  projectName: "first-project",
+  solution3DID: "42545",
+  containerID: "container3d_replace",
+};
+
+
 const options = {
-  ...baseOptions1,
+  ...baseOptions6,
 
   onLoadingChanged: function (loading) {
     loadingBar.style.width = loading.progress + "%";
@@ -113,16 +146,17 @@ window.onload = async () => {
   const getSubParts = (selectedPart) => {
     const { state: { parts } } = store;
     const partType = selectedPart.slice(0, selectedPart.indexOf("]") + 1);
-    let subParts = [];
+    const partNumber = selectedPart.slice(selectedPart.indexOf('('), selectedPart.indexOf(')') + 1);
 
-    if (selectedPart.indexOf("{") !== -1) {
-      subPartsIndex = selectedPart
-        .slice(selectedPart.indexOf("{") + 1, selectedPart.indexOf("}"))
-        .split("-");
-      subParts = parts.filter((part) =>
-        subPartsIndex.some((index) => part.startsWith(`${partType}(${index})`))
-      );
-    }
+    subPartsIndex = selectedPart
+      .slice(selectedPart.indexOf("{") + 1, selectedPart.indexOf("}"))
+      .split("-");
+    
+    const subParts = parts.filter((part) => {
+      const isSubNode = part.startsWith(`[subpart]${partType}${partNumber}`);
+      const isSubPart = subPartsIndex.some((index) => part.startsWith(`${partType}(${index})`))
+      return isSubNode || isSubPart;
+    });
 
     return subParts;
   }
@@ -135,15 +169,18 @@ window.onload = async () => {
     partContainer.className = 'border border-danger border-2'
     
     const filteredMaterials = materials.filter((material) => {
-      const isMaterial = material.includes(part.slice(0, part.indexOf(')') + 1))
+      const materialReference = material.slice(material.indexOf('['), material.indexOf(')') + 1);
+      const isMaterial = materialReference.startsWith(
+        part.slice(0, part.indexOf(")") + 1)
+      );
       if (material.match(/{/g)) {
-        const isSubMaterial = material.match(/{/g).length > 1;
+        const isSubMaterial = (material.match(/{/g).length > 2);
         return isMaterial && !isSubMaterial
       }
        
       return isMaterial
     });
-
+    // console.log(part, filteredMaterials);
     filteredMaterials.forEach((material) => {
       // const label = document.createElement('label');
       // label.htmlFor = material;
@@ -269,9 +306,9 @@ document.getElementById("change1").addEventListener("click", async () => {
   //   console.log(e, r);
   // });
 
-  // Unlimited3D.getAvailableParts(function (error, result) {
-  //   console.log(result);
-  // });
+  Unlimited3D.getAvailableParts(function (error, result) {
+    console.log(result);
+  });
 
   // Unlimited3D.hideParts({
   //   parts: ['TA003 Yellow Fireworks Black and Black']

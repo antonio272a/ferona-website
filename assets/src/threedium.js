@@ -156,7 +156,7 @@ class Threedium {
       material.indexOf("{") + 1,
       material.indexOf("}")
     ); 
-    // console.log(materialNumber)
+
     const materialParts = this._original_parts.filter((part) => {
       const nodePart = part
         .slice(part.indexOf(":") + 1)
@@ -166,9 +166,8 @@ class Threedium {
       
       const isPart = actualObj.startsWith(materialReferenceString);
       const isDependent = actualObj.includes(`#${materialReferenceString}`);
-      const isSubPart = actualObj.startsWith(`[subpart]${materialReferenceString}`)
-      
-      return isPart || isDependent || isSubPart;
+
+      return isPart || isDependent;
     });
 
     const anotherMaterialParts = materialParts.map((part) => {
