@@ -179,7 +179,7 @@ class Threedium {
       const otherMaterialRegex = /\/[0-9]{2}/;
       return otherMaterialRegex.test(part);
     });
-
+    
     const filteredParts = materialParts.filter((p) => {
       const haveAnotherMaterial = anotherMaterialParts.includes(p);
       if(!haveAnotherMaterial) {

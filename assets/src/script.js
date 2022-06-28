@@ -1,80 +1,34 @@
 
-let flagInterract = true;
-
-const baseOptions1 = {
-  distID: "latest",
-  solution3DName: "sa-001-td-chart",
-  projectName: "first-project",
-  solution3DID: "42494",
-  containerID: "container3d_replace",
-};
-
-const baseOptions2 = {
-  distID: "latest",
-  solution3DName: "sa-001-tc-chart",
-  projectName: "first-project",
-  solution3DID: "42489",
-  containerID: "container3d_replace",
-};
-
-const baseOptions3 = {
-  distID: "latest",
-  solution3DName: "pa-002-tc",
-  projectName: "first-project",
-  solution3DID: "42510",
-  containerID: "container3d_replace",
-};
-
-const baseOptions4 = {
-  distID: "latest",
-  solution3DName: "pa-002-td",
-  projectName: "first-project",
-  solution3DID: "42519",
-  containerID: "container3d_replace",
-};
-
-const baseOptions5 = {
-  distID: "latest",
-  solution3DName: "sb001-td-chart",
-  projectName: "first-project",
-  solution3DID: "42498",
-  containerID: "container3d_replace",
-};
-
-const baseOptions6 = {
-  distID: "latest",
-  solution3DName: "sb002-tb",
-  projectName: "first-project",
-  solution3DID: "42545",
-  containerID: "container3d_replace",
-};
-
-
-const options = {
-  ...baseOptions6,
-
-  onLoadingChanged: function (loading) {
-    loadingBar.style.width = loading.progress + "%";
-  },
-
-  onCameraInteraction: function () {
-    if (flagInterract) {
-      document.getElementsByClassName("drag-and-scroll")[0].style.display =
-        "none";
-
-      Unlimited3D.enableAutoRotate({
-        enable: false,
-      });
-
-      flagInterract = false;
-    }
-  },
-
-};
-
-
 
 window.onload = async () => {
+  let flagInterract = true;
+
+  const options = {
+    distID: "latest",
+    solution3DName: "sc002-td-chart",
+    projectName: "first-project",
+    solution3DID: "42502",
+    containerID: "container3d_replace",
+
+    onLoadingChanged: function (loading) {
+      loadingBar.style.width = loading.progress + "%";
+    },
+
+    onCameraInteraction: function () {
+      if (flagInterract) {
+        document.getElementsByClassName("drag-and-scroll")[0].style.display =
+          "none";
+
+        Unlimited3D.enableAutoRotate({
+          enable: false,
+        });
+
+        flagInterract = false;
+      }
+    },
+  };
+
+  
   const threedium = new Threedium();
   await threedium.init(options);
 
@@ -180,17 +134,13 @@ window.onload = async () => {
        
       return isMaterial
     });
-    // console.log(part, filteredMaterials);
-    filteredMaterials.forEach((material) => {
-      // const label = document.createElement('label');
-      // label.htmlFor = material;
-      // label.innerText = material;
 
+    filteredMaterials.forEach((material) => {
       const buttton = document.createElement('button');
       buttton.id = material;
       buttton.innerText = material;
       buttton.onclick = ({target: { id }}) => applyMaterials(id); 
-      // label.appendChild(input);
+
       partContainer.appendChild(buttton);
     });
 
@@ -254,144 +204,3 @@ window.onload = async () => {
   // });
   await store._stateCallback();
 }
-
-
-
-document.getElementById("change1").addEventListener("click", async () => {
-  Unlimited3D.getAvailableCustomParts(function (error, results) {
-    console.log(results);
-  });
-  // Unlimited3D.showParts({
-  //   parts: ["[top](01):PA001_TC001_Mesh"],
-  // });
-  // Unlimited3D.showParts({
-  //   partObjects: [
-  //     {
-  //       parts: [
-  //         "[top](01):PA001_TC001_Mesh",
-  //         "SA 001:[subpart][top](01){2}#[top](01)",
-  //         "SA 001:[subpart][top](01){1}#[top](01)",
-  //       ],
-  //     },
-  //   ],
-  // });
-  // Unlimited3D.changeMaterialMap(
-  //   { material: "Material01", texture: "Texture01", mapType: "diffuseMap" },
-  //   () => {}
-  // );
-  
-  // Unlimited3D.changeMaterial(
-  //   {
-  //     parts: ["TA003 Yellow Fireworks Black and Black:Node-3"],
-  //     material: "TA Black Fireworks",
-  //   },
-  //   (e, r) => {
-  //     console.log(e, r);
-  //   }
-  // );
-
-  // Unlimited3D.getAvailableAnnotations(function (error, result) {
-  //   console.log(result);
-  // });
-
-  // Unlimited3D.getAvailableMaterials(function (error, result) {
-  //   console.log(result);
-  // });
-
-  // Unlimited3D.getAvailableTextures(function (error, result) {
-  //   console.log(result);
-  // });
-
-  // Unlimited3D.getMaterial({ part: "Top 01 Example" }, function (e, r) {
-  //   console.log(e, r);
-  // });
-
-  Unlimited3D.getAvailableParts(function (error, result) {
-    console.log(result);
-  });
-
-  // Unlimited3D.hideParts({
-  //   parts: ['TA003 Yellow Fireworks Black and Black']
-  // })
-
-  // Unlimited3D.getAvailableMaterials((e, r) => {
-  //   console.log(e, 'materiais', r);
-  // });
-
-  // Unlimited3D.getMaterial(
-  //   {
-  //     part: "TA003 Yellow Fireworks Black and Black:Node-3",
-  //   },
-  //   function (e, r) {
-  //     console.log(e, r);
-  //   }
-  // );
-  
-  // Unlimited3D.applyMaterialToAllParts({ material: "Yellow Fireworks" }, (e) => {
-  //   if (e) console.log(e);
-  // });
-  // Unlimited3D.getAvailableTextures((e, r) => {
-  //   console.log('texturas', e, r);
-  // });
-  // Unlimited3D.changeMaterialColor({
-  //   material: "initialShadingGroup-1",
-  //   color: "#ff0000",
-  // });
-});
-
-
-
-// manequin initialShadingGroup-1
-// top 01 initialShadingGroup-2
-// top 02 initialShadingGroup-3
-// top 03 initialShadingGroup-4
-
-//[top]{top01}
-
-
-
-
-// Unlimited3D.init(options);
-
-//  do not change code below
-// if (checkAr() == 'android') {
-//     arButton.setAttribute("rel", "ar");
-//     arButton.setAttribute(
-//         "href",
-//         "intent://arvr.google.com/scene-viewer/1.0?file=.glb#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=%23;end;",
-//     );
-    
-//     arButton.addEventListener("click", arMobile )
-
-// } else if (checkAr() == "ios" || checkAr() == 'ipad') {
-//     arButton.setAttribute("rel", "ar");
-//     arButton.setAttribute(
-//         "href",
-//         ".usdz"
-//     ); 
-
-//     arButton.addEventListener("click", arMobile )
-    
-// }else{
-//     arButton.addEventListener("click", function() {
-        
-//         if (document.querySelector('.QRcode').style.display == 'flex')
-//             document.querySelector('.QRcode').style.display = 'none'
-//         else
-//             document.querySelector('.QRcode').style.display = 'flex'
-//     });
-//     document.getElementById("closeQRcode").addEventListener("click", function() {
-//         document.querySelector('.QRcode').style.display = 'none'
-//         // analitika ovde 
-//     });
-
-//     arButton.addEventListener("click", arMobile);
-// };
-
-function arMobile() {
-    // gtag('event', 'Interact', {
-    //     'event_category': 'Click',
-    //     'event_label': "ime",
-    //     'value': 'AR Icon Click',
-    // });
-};
