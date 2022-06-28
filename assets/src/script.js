@@ -2,12 +2,20 @@
 
 window.onload = async () => {
   let flagInterract = true;
+  
+  const referenceObj = {
+    "SKU-1831245R718": {
+      solution3DID: '425021',
+      solution3DName:"sc002-td-chart"
+    },
+  };
+  
 
   const options = {
     distID: "latest",
-    solution3DName: "sc002-td-chart",
+    solution3DName: "sc002-tc-chart",
     projectName: "first-project",
-    solution3DID: "42502",
+    solution3DID: "42501",
     containerID: "container3d_replace",
 
     onLoadingChanged: function (loading) {
