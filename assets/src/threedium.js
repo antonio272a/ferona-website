@@ -21,48 +21,50 @@ class Threedium {
         });
       });
       
-      Unlimited3D.getAvailableParts((e, result) => {
-        if (e) {
-          console.log(e);
-          reject(e)
-          return;
-        }
-        const allowedParts = ['[top]', '[bottom]', '[subpart]'];
-        
-        const threatedResult = result.map(({ name }) => name.toLowerCase());
-
-        const filteredParts = threatedResult.filter((name) => {
-          const isPart = allowedParts.includes(
-            name.slice(0, name.indexOf("]") + 1)
-          );
-          const isNode = allowedParts.includes(
-            name.slice(name.indexOf(":") + 1, name.indexOf("]") + 1)
-          );
-          return (isPart || isNode);
-        });
-        
-        const mappedParts = filteredParts.map((name) => { 
-          const isPart = allowedParts.includes(
-            name.slice(0, name.indexOf("]") + 1)
-          );
-          const isNode = allowedParts.includes(
-            name.slice(name.indexOf(":") + 1, name.indexOf("]") + 1)
-          );
-
-          if(isPart) {
-            return name.slice(0, name.indexOf(':'));
+      await new Promise((res, rej) => {
+        Unlimited3D.getAvailableParts((e, result) => {
+          if (e) {
+            console.log(e);
+            rej(e)
+            reject(e)
+            return;
           }
+          const allowedParts = ['[top]', '[bottom]', '[subpart]'];
+          
+          const threatedResult = result.map(({ name }) => name.toLowerCase());
 
-          if(isNode) {
-            return name.slice(name.indexOf(':') + 1)
-          }
-        });
-        
+          const filteredParts = threatedResult.filter((name) => {
+            const isPart = allowedParts.includes(
+              name.slice(0, name.indexOf("]") + 1)
+            );
+            const isNode = allowedParts.includes(
+              name.slice(name.indexOf(":") + 1, name.indexOf("]") + 1)
+            );
+            return (isPart || isNode);
+          });
+          
+          const mappedParts = filteredParts.map((name) => { 
+            const isPart = allowedParts.includes(
+              name.slice(0, name.indexOf("]") + 1)
+            );
+            const isNode = allowedParts.includes(
+              name.slice(name.indexOf(":") + 1, name.indexOf("]") + 1)
+            );
+
+            if(isPart) {
+              return name.slice(0, name.indexOf(':'));
+            }
+
+            if(isNode) {
+              return name.slice(name.indexOf(':') + 1)
+            }
+          });
           this._parts = mappedParts;
           this._original_parts = result.map(({name}) => name);
-          
-      });
-    
+          res();
+        });
+      })
+      
       Unlimited3D.getAvailableMaterials((e, result) => {
         if (e) {
           console.log(e);
@@ -71,8 +73,8 @@ class Threedium {
         }
         const mappedMaterials = result.map((material) => material.name);
         this._materials = mappedMaterials;
+        resolve();
       });
-      resolve();
     });
   }
 
@@ -147,6 +149,32 @@ class Threedium {
     });
   }
 
+  setDefaultMateirals = () => {
+    return new Promise((resolve, reject) => {
+      const whiteMaterialRegex = /^white$/i;
+      const mannequinRegex = /^mannequin/i;
+      const whiteMaterial = this._materials.find((material) => whiteMaterialRegex.test(material.trim()));
+      const notMannequinParts = this._original_parts.filter((part) => (
+        !mannequinRegex.test(part) && part.includes('[')
+      ));
+      
+      Unlimited3D.changeMaterial(
+        {
+          parts: notMannequinParts,
+          material: whiteMaterial,
+        },
+        (e) => {
+          console.log(e);
+          if (e) {
+            reject(e);
+            return e;
+          }
+          resolve();
+        }
+      );
+    });
+  }
+
   applyMaterials = (material) => {
     const materialReferenceString = material
       .slice(material.indexOf("|") + 1, material.indexOf(")") + 1)
@@ -179,7 +207,7 @@ class Threedium {
       const otherMaterialRegex = /\/[0-9]{2}/;
       return otherMaterialRegex.test(part);
     });
-    
+
     const filteredParts = materialParts.filter((p) => {
       const haveAnotherMaterial = anotherMaterialParts.includes(p);
       if(!haveAnotherMaterial) {

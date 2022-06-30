@@ -5,17 +5,17 @@ window.onload = async () => {
   
   const referenceObj = {
     "SKU-1831245R718": {
-      solution3DID: '425021',
-      solution3DName:"sc002-td-chart"
+      solution3DID: "42548",
+      solution3DName: "sc002-ta",
     },
   };
   
 
   const options = {
     distID: "latest",
-    solution3DName: "sc002-tc-chart",
+    solution3DName: "pa002-td",
     projectName: "first-project",
-    solution3DID: "42501",
+    solution3DID: "42519",
     containerID: "container3d_replace",
 
     onLoadingChanged: function (loading) {
@@ -39,6 +39,7 @@ window.onload = async () => {
   
   const threedium = new Threedium();
   await threedium.init(options);
+  await threedium.setDefaultMateirals();
 
   const initialState = {
     selectedTop: threedium.parts.find((part) =>
@@ -200,12 +201,11 @@ window.onload = async () => {
     await selectParts();
   });
 
-  // document.getElementById("change2").addEventListener("click", async () => {
-  //   // console.log(threedium.parts);
-  //   // console.log(threedium.materials);
-  //   console.log(store.state);
-    
-  // });
+  document.getElementById("change2").addEventListener("click", async () => {
+    // console.log(threedium.parts);
+    // console.log(threedium.materials);
+    console.log(store.state);
+  });
 
   // document.getElementById("change1").addEventListener("click", async () => {
   //   console.log(threedium);
