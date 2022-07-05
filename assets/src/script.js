@@ -49,20 +49,24 @@ window.onload = async () => {
   const threedium = new Threedium();
   await threedium.init(options);
   await threedium.setDefaultMateirals();
-
+  
+  // add the selectedMaterials keys to the store
+  const selectedMaterials = {};
+  threedium.parts.filter((part) => (
+    part.startsWith('[') && !part.includes('#') 
+  )).forEach((part) => selectedMaterials[part] = null);
+  console.log(selectedMaterials);
   const initialState = {
     selectedTop: threedium.parts.find((part) => part.startsWith("[top](01)")),
     selectedBottom: threedium.parts.find((part) =>
       part.startsWith("[bottom](01)")
     ),
-    selectedTopMaterials: [],
-    selectedBottomMaterials: [],
     parts: threedium.parts,
-    materials: threedium.materials,
+    materials: threedium.materials
   };
 
   const store = new Store(initialState);
-  const selectedMaterials = selectedMaterials;
+  const materialsStore = new Store(selectedMaterials)
 
   const topPartContainer = document.getElementById(topPartContainerId);
   const bottomPartContainer = document.getElementById(bottomPartContainerId);
@@ -168,11 +172,18 @@ window.onload = async () => {
     });
 
     filteredMaterials.forEach((material) => {
+      const isSubPart = material.includes("[subpart]");
+      const firstIndex = material.indexOf("[");
+      const lastIndex = isSubPart ? material.indexOf("}") : material.indexOf(")") + 1;
+      const partReference = material.slice(firstIndex, lastIndex);
+      
       const buttton = document.createElement("button");
       buttton.id = material;
       buttton.innerText = material;
-      buttton.onclick = ({ target: { id } }) => {
-        
+      buttton.disabled = materialsStore.state[partReference] === material
+
+      buttton.onclick = ({ target: { id } }) => {  
+        materialsStore.setState({[partReference]: id});
         applyMaterials(id)
       };
 
@@ -227,6 +238,12 @@ window.onload = async () => {
     createMaterialContainers();
     await selectParts();
   });
+
+  materialsStore.setStateCallback(() => {
+    clearButtons();
+    createPartsButtons();
+    createMaterialContainers();
+  })
 
   let mannequinDisplayed = true;
 
