@@ -195,85 +195,89 @@ class Threedium {
   };
 
   applyMaterials = (material) => {
-    const materialReferenceString = material
+    return new Promise((resolve, reject) => {
+
+      const materialReferenceString = material
       .slice(material.indexOf("|") + 1, material.indexOf(")") + 1)
       .trim();
-
-    const materialNumber = material.slice(
-      material.indexOf("{") + 1,
-      material.indexOf("}")
-    );
-
-    const materialParts = this._original_parts.filter((part) => {
-      const nodePart = part.slice(part.indexOf(":") + 1).trim();
-      const objectPart = part.trim();
-      const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
-
-      const isPart = actualObj.startsWith(materialReferenceString);
-      const isDependent = actualObj.includes(`#${materialReferenceString}`);
-
-      return isPart || isDependent;
-    });
-
-    const anotherMaterialParts = materialParts
-      .map((part) => {
-        const nodePart = part.slice(part.indexOf(":") + 1).trim();
-        const objectPart = part.trim();
-        const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
-        return actualObj;
-      })
-      .filter((part) => {
-        const otherMaterialRegex = /\/[0-9]{2}/;
-        return otherMaterialRegex.test(part);
-      });
-
-    const filteredParts = materialParts.filter((p) => {
-      const haveAnotherMaterial = anotherMaterialParts.includes(p);
-      if (!haveAnotherMaterial) {
-        return true;
-      }
-
-      const firstBar = p.indexOf("/");
-      const secondBar = p.indexOf("/", firstBar + 1);
-      const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
-
-      const isTheMaterialSelected = otherMaterials.includes(materialNumber);
-
-      return !isTheMaterialSelected;
-    });
-
-    const changeOtherMaterials = () => {
-      anotherMaterialParts.forEach((p) => {
-        const firstBar = p.indexOf("/");
-        const secondBar = p.indexOf("/", firstBar + 1);
-        const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
-        const partReference = p.slice(p.indexOf("["), firstBar);
-
-        if (otherMaterials.includes(materialNumber)) {
-          const otherMaterial = this._materials.find((m) =>
-            m.includes(`${partReference}{${materialNumber}}`)
-          );
-          Unlimited3D.changeMaterial({
-            parts: [p],
-            material: otherMaterial,
+      
+      const materialNumber = material.slice(
+        material.indexOf("{") + 1,
+        material.indexOf("}")
+        );
+        
+        const materialParts = this._original_parts.filter((part) => {
+          const nodePart = part.slice(part.indexOf(":") + 1).trim();
+          const objectPart = part.trim();
+          const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
+          
+          const isPart = actualObj.startsWith(materialReferenceString);
+          const isDependent = actualObj.includes(`#${materialReferenceString}`);
+          
+          return isPart || isDependent;
+        });
+        
+        const anotherMaterialParts = materialParts
+        .map((part) => {
+          const nodePart = part.slice(part.indexOf(":") + 1).trim();
+          const objectPart = part.trim();
+          const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
+          return actualObj;
+        })
+        .filter((part) => {
+          const otherMaterialRegex = /\/[0-9]{2}/;
+          return otherMaterialRegex.test(part);
+        });
+        
+        const filteredParts = materialParts.filter((p) => {
+          const haveAnotherMaterial = anotherMaterialParts.includes(p);
+          if (!haveAnotherMaterial) {
+            return true;
+          }
+          
+          const firstBar = p.indexOf("/");
+          const secondBar = p.indexOf("/", firstBar + 1);
+          const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
+          
+          const isTheMaterialSelected = otherMaterials.includes(materialNumber);
+          
+          return !isTheMaterialSelected;
+        });
+        
+        const changeOtherMaterials = () => {
+          anotherMaterialParts.forEach((p) => {
+            const firstBar = p.indexOf("/");
+            const secondBar = p.indexOf("/", firstBar + 1);
+            const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
+            const partReference = p.slice(p.indexOf("["), firstBar);
+            
+            if (otherMaterials.includes(materialNumber)) {
+              const otherMaterial = this._materials.find((m) =>
+              m.includes(`${partReference}{${materialNumber}}`)
+              );
+              Unlimited3D.changeMaterial({
+                parts: [p],
+                material: otherMaterial,
+              });
+            }
           });
-        }
-      });
-    };
-
-    Unlimited3D.changeMaterial(
-      {
-        parts: filteredParts,
-        material,
-      },
-      (e, _r) => {
-        if (e) {
-          console.log(e);
-          return;
-        }
-        changeOtherMaterials();
-      }
-    );
+        };
+        
+        Unlimited3D.changeMaterial(
+          {
+            parts: filteredParts,
+            material,
+          },
+          (e, _r) => {
+            if (e) {
+              console.log(e);
+              return;
+            }
+            resolve();
+            changeOtherMaterials();
+          }
+          );
+    });
   };
 
   get parts() {

@@ -15,7 +15,7 @@ const selectedPartButtonClassName = 'btn btn-primary m-1';
 const notSelectePartButtonClassName = 'btn btn-secondary m-1';
 
 const showImage = false;
-const id = 42444;
+const id = 42478;
 
 // CallBacks to interact with the user
 const notAllMaterialsSelected = (partsArray) => {
@@ -175,6 +175,18 @@ window.onload = async () => {
     return subParts;
   };
 
+  const toggleDisabledMaterialButtons = (material, disabled) => {
+    const reference = material.slice(material.indexOf('|') + 1, material.indexOf('{')).trim()
+    const possibleButtons = threedium.materials.filter((mat) => {
+      const matReference = mat.slice(mat.indexOf("|") + 1).trim();
+      return matReference.startsWith(reference);
+    })
+    possibleButtons.forEach((possibleButton) => {
+      const button = document.getElementById(possibleButton);
+      if(button) button.disabled = disabled;
+    })
+  }
+
   const createMaterialsButtons = (part, container) => {
     const {
       state: { materials },
@@ -218,6 +230,7 @@ window.onload = async () => {
         image.src = materialImages[materialKey] || "./assets/images/materials/red.jpg";
         if(!materialImages[materialKey]) console.log(material);
         image.style.width = "10px"
+        image.id = material
         button.appendChild(image)
       } else {
         button.innerText = material;
@@ -233,9 +246,11 @@ window.onload = async () => {
         button.className = notSelectedMaterialButtonClassName;
       }
 
-      button.onclick = ({ target: { id } }) => {
+      button.onclick = async ({ target: { id } }) => {
         materialsStore.setState({ [part]: id });
-        applyMaterials(id);
+        toggleDisabledMaterialButtons(id, true);
+        await applyMaterials(id);
+        toggleDisabledMaterialButtons(id, false);
       };
 
       partContainer.appendChild(button);
