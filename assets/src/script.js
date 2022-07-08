@@ -14,6 +14,9 @@ const selectedMaterialButtonClassName = 'btn btn-primary btn-sm m-1';
 const selectedPartButtonClassName = 'btn btn-primary m-1';
 const notSelectePartButtonClassName = 'btn btn-secondary m-1';
 
+const showImage = false;
+const id = 42444;
+
 // CallBacks to interact with the user
 const notAllMaterialsSelected = (partsArray) => {
   const partsTextForAlert = partsArray.reduce((acc, act, i) => {
@@ -36,9 +39,10 @@ window.onload = async () => {
   const sku = "SKU-1831245R718";
 
   // reference for the threedium based on the sku's;
+
   const skuReference = {
     "SKU-1831245R718": {
-      solution3DID: "42489",
+      solution3DID: id,
       solution3DName: "sa-001-td-chart",
     },
   };
@@ -84,10 +88,10 @@ window.onload = async () => {
     .forEach((part) => (selectedMaterials[part] = null));
 
   const initialState = {
-    selectedTop: threedium.parts.find((part) => part.startsWith("[top](01)")),
-    selectedBottom: threedium.parts.find((part) =>
-      part.startsWith("[bottom](01)")
-    ),
+    selectedTop:
+      threedium.parts.find((part) => part.startsWith("[top](01)")) || "",
+    selectedBottom:
+      threedium.parts.find((part) => part.startsWith("[bottom](01)")) || "",
     parts: threedium.parts,
     materials: threedium.materials,
   };
@@ -181,12 +185,13 @@ window.onload = async () => {
     partContainer.className = materialContainerClassName;
 
     const filteredMaterials = materials.filter((material) => {
+      const subMaterialPlus = material.includes('[subpart]') ? 4 : 0;
       const materialReference = material.slice(
         material.indexOf("["),
-        material.indexOf(")") + 1
+        material.indexOf(")") + 1 + subMaterialPlus
       );
       const isMaterial = materialReference.startsWith(
-        part.slice(0, part.indexOf(")") + 1)
+        part.slice(0, part.indexOf(")") + 1 + subMaterialPlus)
       );
       if (material.match(/{/g)) {
         const isSubMaterial = material.match(/{/g).length > 2;
@@ -206,23 +211,34 @@ window.onload = async () => {
       const part = threedium.parts.find((p) => p.startsWith(partReference));
       const isSelected = materialsStore.state[part] === material;
 
-      const buttton = document.createElement("button");
-      buttton.id = material;
-      buttton.innerText = material;
+      const button = document.createElement("button");
+      if (showImage) {
+        const materialKey = material.slice(0, material.indexOf("|")).trim().toLowerCase();
+        const image = document.createElement('img');
+        image.src = materialImages[materialKey] || "./assets/images/materials/red.jpg";
+        if(!materialImages[materialKey]) console.log(material);
+        image.style.width = "10px"
+        button.appendChild(image)
+      } else {
+        button.innerText = material;
+      }
+      
+      button.id = material;
+      // buttton.innerText = material;
 
       if (isSelected) {
-        buttton.disabled = true;
-        buttton.className = selectedMaterialButtonClassName;
+        button.disabled = true;
+        button.className = selectedMaterialButtonClassName;
       } else {
-        buttton.className = notSelectedMaterialButtonClassName;
+        button.className = notSelectedMaterialButtonClassName;
       }
 
-      buttton.onclick = ({ target: { id } }) => {
+      button.onclick = ({ target: { id } }) => {
         materialsStore.setState({ [part]: id });
         applyMaterials(id);
       };
 
-      partContainer.appendChild(buttton);
+      partContainer.appendChild(button);
     });
 
     container.appendChild(partContainer);
@@ -233,29 +249,33 @@ window.onload = async () => {
       state: { selectedTop, selectedBottom },
     } = store;
 
-    const topSubParts = getSubParts(selectedTop);
+    if (selectedTop) {
+      const topSubParts = getSubParts(selectedTop);
 
-    if (!selectedTop.includes("#")) {
-      createMaterialsButtons(selectedTop, topMaterialContainer);
+      if (!selectedTop.includes("#")) {
+        createMaterialsButtons(selectedTop, topMaterialContainer);
+      }
+
+      topSubParts.forEach((subPart) => {
+        if (!subPart.includes("#")) {
+          createMaterialsButtons(subPart, topMaterialContainer);
+        }
+      });
     }
 
-    topSubParts.forEach((subPart) => {
-      if (!subPart.includes("#")) {
-        createMaterialsButtons(subPart, topMaterialContainer);
+    if (selectedBottom) {
+      const bottomSubParts = getSubParts(selectedBottom);
+
+      if (!selectedBottom.includes("#")) {
+        createMaterialsButtons(selectedBottom, bottomMaterialContainer);
       }
-    });
 
-    const bottomSubParts = getSubParts(selectedBottom);
-
-    if (!selectedBottom.includes("#")) {
-      createMaterialsButtons(selectedBottom, bottomMaterialContainer);
+      bottomSubParts.forEach((subPart) => {
+        if (!subPart.includes("#")) {
+          createMaterialsButtons(subPart, bottomMaterialContainer);
+        }
+      });
     }
-
-    bottomSubParts.forEach((subPart) => {
-      if (!subPart.includes("#")) {
-        createMaterialsButtons(subPart, bottomMaterialContainer);
-      }
-    });
   };
 
   const selectParts = async () => {
@@ -263,8 +283,9 @@ window.onload = async () => {
     const {
       state: { selectedTop, selectedBottom },
     } = store;
-    await selectPart(selectedTop);
-    await selectPart(selectedBottom);
+    if (selectedTop) await selectPart(selectedTop);
+
+    if (selectedBottom) await selectPart(selectedBottom);
   };
 
   store.setStateCallback(async () => {
@@ -343,10 +364,15 @@ window.onload = async () => {
           hasIndependentColor
         );
       })
-      .map((part) => ({
-        part,
-        material: materialsStore.state[part],
-      }));;
+      .map((part) => {
+        const { solution3DID: id } = skuReference[sku];
+
+        const material = materialsStore.state[part];
+        return {
+          part: partNamesReference[id][part],
+          material: material.slice(0, material.indexOf("|")).trim(),
+        };
+      });
 
     const allColorsSelected = selectedPartsWithIndependentMaterials.every(
       (part) => materialsStore.state[part] !== null
@@ -372,45 +398,49 @@ window.onload = async () => {
           part.indexOf("$")
         );
 
-        
         const isPart = selectedTop === part || selectedBottom === part;
-        
+
         const isDependent =
           selectedTop.startsWith(dependentFromReference) ||
           selectedBottom.startsWith(dependentFromReference);
-        
-        const isSubPart = (
-          part.startsWith(`[subpart]${selectedTop.slice(selectedTop.indexOf('['), selectedTop.indexOf(')') + 1)}`) ||
-          part.startsWith(`[subpart]${selectedBottom.slice(selectedBottom.indexOf('['), selectedBottom.indexOf(')') + 1)}`)
-        )
 
-        const topSubPartNumber = selectedTop.slice(selectedTop.indexOf('{') + 1, selectedTop.indexOf('}'));
+        const isSubPart =
+          part.startsWith(
+            `[subpart]${selectedTop.slice(
+              selectedTop.indexOf("["),
+              selectedTop.indexOf(")") + 1
+            )}`
+          ) ||
+          part.startsWith(
+            `[subpart]${selectedBottom.slice(
+              selectedBottom.indexOf("["),
+              selectedBottom.indexOf(")") + 1
+            )}`
+          );
+
+        const topSubPartNumber = selectedTop.slice(
+          selectedTop.indexOf("{") + 1,
+          selectedTop.indexOf("}")
+        );
         const bottomSubPartNumber = selectedBottom.slice(
           selectedBottom.indexOf("{") + 1,
           selectedBottom.indexOf("}")
-        )
-        const isSubPartFromSubPart = (
-          part.startsWith(`[subpart][top](${topSubPartNumber})`) || 
-          part.startsWith(`[subpart][bottom](${bottomSubPartNumber})`)
         );
+        const isSubPartFromSubPart =
+          part.startsWith(`[subpart][top](${topSubPartNumber})`) ||
+          part.startsWith(`[subpart][bottom](${bottomSubPartNumber})`);
 
-        
+        const isDependentFromSubPart =
+          dependentFromReference.startsWith(`[top](${topSubPartNumber})`) ||
+          dependentFromReference.startsWith(`[bottom](${bottomSubPartNumber})`);
 
-        const isDependentFromSubPart = (
-          dependentFromReference.startsWith(`[top](${topSubPartNumber})`) || 
-          dependentFromReference.startsWith(`[bottom](${bottomSubPartNumber})`)  
-        );
-        console.log(
-          topSubPartNumber,
-          bottomSubPartNumber,
-          dependentFromReference
-        );
         return (
-          ((isPart || isSubPart || isSubPartFromSubPart) &&
-          (isDependentFromSubPart || isDependent))
+          (isPart || isSubPart || isSubPartFromSubPart) &&
+          (isDependentFromSubPart || isDependent)
         );
       })
       .map((part) => {
+        const { solution3DID: id } = skuReference[sku];
         const reference = part.slice(part.indexOf("#") + 1, part.indexOf("$"));
         const dependentFromPart = threedium.parts.find((p) =>
           p.startsWith(reference)
@@ -418,13 +448,15 @@ window.onload = async () => {
         const material = materialsStore.state[dependentFromPart];
 
         return {
-          part,
-          material,
+          part: partNamesReference[id][part],
+          material: material.slice(0, material.indexOf("|")).trim(),
         };
       });
 
-    console.log(selectedPartsWithDependentMaterials);
-    const partsToSave = [...selectedPartsWithIndependentMaterials, ...selectedPartsWithDependentMaterials]
+    const partsToSave = [
+      ...selectedPartsWithIndependentMaterials,
+      ...selectedPartsWithDependentMaterials,
+    ];
 
     console.log(partsToSave);
     sessionStorage.setItem(
@@ -435,6 +467,6 @@ window.onload = async () => {
       })
     );
   });
-
+  console.log();
   await store._stateCallback();
 }
