@@ -196,9 +196,9 @@ class Threedium {
 
   applyMaterials = (material) => {
     return new Promise((resolve, reject) => {
-
+      const subpartPlus = material.includes('[subpart]') ? 4 : 0
       const materialReferenceString = material
-      .slice(material.indexOf("|") + 1, material.indexOf(")") + 1)
+      .slice(material.indexOf("|") + 1, material.indexOf(")") + 1 + subpartPlus)
       .trim();
       
       const materialNumber = material.slice(
@@ -210,7 +210,6 @@ class Threedium {
           const nodePart = part.slice(part.indexOf(":") + 1).trim();
           const objectPart = part.trim();
           const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
-          
           const isPart = actualObj.startsWith(materialReferenceString);
           const isDependent = actualObj.includes(`#${materialReferenceString}`);
           
@@ -271,6 +270,7 @@ class Threedium {
           (e, _r) => {
             if (e) {
               console.log(e);
+              reject();
               return;
             }
             resolve();
