@@ -1,5 +1,5 @@
 window.onload = async () => {
-
+partImageOnMaterialClassName;
 
   const options = {
     distID: "latest",
@@ -79,7 +79,7 @@ window.onload = async () => {
         button.disabled = true;
         button.className = selectedPartButtonClassName;
       } else {
-        button.className = notSelectePartButtonClassName;
+        button.className = notSelectedPartButtonClassName;
       }
       container.appendChild(button);
     });
@@ -147,7 +147,7 @@ window.onload = async () => {
     const partRealName = partNamesReference[skuReference[sku].solution3DID][part];
 
     partImage.src = partImages[partRealName]
-    partImage.className = partImageOnMateiralClassName
+    partImage.className = partImageOnMaterialClassName
     partContainer.appendChild(partImage);
 
     partContainer.id = part;

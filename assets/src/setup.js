@@ -13,9 +13,9 @@ const materialSubContainerClassName = "border border-warning border-2";
 const notSelectedMaterialButtonClassName = "btn btn-secondary btn-sm m-1";
 const selectedMaterialButtonClassName = "btn btn-primary btn-sm m-1";
 const selectedPartButtonClassName = "btn btn-primary m-1";
-const notSelectePartButtonClassName = "btn btn-secondary m-1";
+const notSelectedPartButtonClassName = "btn btn-secondary m-1";
 const partImageOnPartClassName = "";
-const partImageOnMateiralClassName = "";
+const partImageOnMaterialClassName = "";
 
 
 // CallBacks to interact with the user
@@ -30,7 +30,7 @@ const notAllMaterialsSelected = (partsArray) => {
   }, "");
 
   window.alert(
-    `Please selecte material for the following parts: \n - ${partsTextForAlert}`
+    `Please select material for the following parts: \n - ${partsTextForAlert}`
   );
 };
 
