@@ -5,10 +5,7 @@ body, html {
 }
 
 img {
-    height: auto;
-    width: auto;
-    object-fit: contain;
-    object-position: top center;
+    width: 50px;
 }
 
 .objCover {
@@ -97,6 +94,8 @@ img {
     border-radius: 6.5px;
     background-color: rgb(74, 144, 226);
 }
+
+
 
 .model,
 #container3d_replace {

@@ -102,7 +102,7 @@ const partNamesReference = {
   },
   42521: {
     name: "SA002 TB",
-    "[top](01)": "TA001",
+    "[top](01)": "TB001",
     "[top](02){01}": "TB002",
     "[top](03){01}#[top](01)$": "TB003-FRILL",
     "[subpart][top](03){01)#[top](01)$": "TB003-SLEEVES",
@@ -305,3 +305,4 @@ const partNamesReference = {
     "[bottom](01)": "SD002",
   },
 };
+

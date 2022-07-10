@@ -1,102 +1,11 @@
-// Id's for the interaction with the HTML
-const threediumContainerId = "container3d_replace";
-const topPartContainerId = "top-part-container";
-const bottomPartContainerId = "bottom-part-container";
-const topMaterialContainerId = "top-material-container";
-const bottomMaterialContainerId = "bottom-material-container";
-const mannequinBtnId = 'toggle-mannequin-btn';
-const saveButtonId = 'save-btn';
-
-// Classes for the styling
-const materialContainerClassName = "border border-danger border-2";
-const notSelectedMaterialButtonClassName = 'btn btn-secondary btn-sm m-1';
-const selectedMaterialButtonClassName = 'btn btn-primary btn-sm m-1';
-const selectedPartButtonClassName = 'btn btn-primary m-1';
-const notSelectePartButtonClassName = 'btn btn-secondary m-1';
-const materialSubContainerClassName = "border border-warning border-2";
-const partImageClassName = ""
-
-const showImage = false;
-const id = 42547;
-
-// CallBacks to interact with the user
-const notAllMaterialsSelected = (partsArray) => {
-  const partsTextForAlert = partsArray.reduce((acc, act, i) => {
-    if (i !== 0) {
-      return `${acc}, ${act}`;
-    }
-    return `${act}`;
-  }, "");
-
-  window.alert(
-    `Please selecte material for the following parts: \n - ${partsTextForAlert}`
-  );
-}
-
-
 window.onload = async () => {
-  let flagInterract = true;
 
-  // In the application the sku will come from somewhere like the URL;
-  const sku = "sku-0";
-
-  // reference for the threedium based on the sku's;
-
-  const skuReference = {
-    "sku-0": { solution3DID: "42444", solution3DName: "DR 001" },
-    "sku-1": { solution3DID: "42476", solution3DName: "PA001 TA" },
-    "sku-2": { solution3DID: "42478", solution3DName: "PA001 TB" },
-    "sku-3": { solution3DID: "42480", solution3DName: "PA001 TD" },
-    "sku-4": { solution3DID: "42481", solution3DName: "PA001 TC" },
-    "sku-5": { solution3DID: "42487", solution3DName: "SA001 TA" },
-    "sku-6": { solution3DID: "42488", solution3DName: "SA001 TB" },
-    "sku-7": { solution3DID: "42489", solution3DName: "SA001 TC" },
-    "sku-8": { solution3DID: "42494", solution3DName: "SA001 TD" },
-    "sku-9": { solution3DID: "42495", solution3DName: "SB001 TA" },
-    "sku-10": { solution3DID: "42496", solution3DName: "SB001 TB" },
-    "sku-11": { solution3DID: "42497", solution3DName: "SB001 TC" },
-    "sku-12": { solution3DID: "42498", solution3DName: "SB001 TD" },
-    "sku-13": { solution3DID: "42499", solution3DName: "SC001 TA" },
-    "sku-14": { solution3DID: "42500", solution3DName: "SC001 TB" },
-    "sku-15": { solution3DID: "42501", solution3DName: "SC001 TC" },
-    "sku-16": { solution3DID: "42502", solution3DName: "SC001 TD" },
-    "sku-17": { solution3DID: "42503", solution3DName: "SD001 TA" },
-    "sku-18": { solution3DID: "42504", solution3DName: "SD001 TB" },
-    "sku-19": { solution3DID: "42505", solution3DName: "SD001 TC" },
-    "sku-20": { solution3DID: "42506", solution3DName: "SD001 TD" },
-    "sku-21": { solution3DID: "42507", solution3DName: "TD001" },
-    "sku-22": { solution3DID: "42508", solution3DName: "PA002 TA" },
-    "sku-23": { solution3DID: "42509", solution3DName: "PA002 TB" },
-    "sku-24": { solution3DID: "42510", solution3DName: "PA002 TC" },
-    "sku-25": { solution3DID: "42519", solution3DName: "PA002 TD" },
-    "sku-26": { solution3DID: "42520", solution3DName: "SA002 TA" },
-    "sku-27": { solution3DID: "42521", solution3DName: "SA002 TB" },
-    "sku-28": { solution3DID: "42522", solution3DName: "SA002 TC" },
-    "sku-29": { solution3DID: "42523", solution3DName: "SA002 TD" },
-    "sku-30": { solution3DID: "42544", solution3DName: "SB002 TA" },
-    "sku-31": { solution3DID: "42545", solution3DName: "SB002 TB" },
-    "sku-32": { solution3DID: "42546", solution3DName: "SB002 TC" },
-    "sku-33": { solution3DID: "42547", solution3DName: "SB002 TD" },
-    "sku-34": { solution3DID: "42548", solution3DName: "SC002 TA" },
-    "sku-35": { solution3DID: "42575", solution3DName: "SC002 TB" },
-    "sku-36": { solution3DID: "42576", solution3DName: "SC002 TC" },
-    "sku-37": { solution3DID: "42577", solution3DName: "SC002 TD" },
-    "sku-38": { solution3DID: "42578", solution3DName: "SD002 TA" },
-    "sku-39": { solution3DID: "42579", solution3DName: "SD002 TB" },
-    "sku-40": { solution3DID: "42580", solution3DName: "SD002 TC" },
-    "sku-41": { solution3DID: "42581", solution3DName: "SD002 TD" },
-  };
-
-  //  42494; 42594 42489
-
-  // top(02) 42476
-  // subpart 42489
 
   const options = {
     distID: "latest",
     solution3DName: skuReference[sku].solution3DName,
     projectName: "first-project",
-    solution3DID: id || skuReference[sku].solution3DID,
+    solution3DID: skuReference[sku].solution3DID,
     containerID: threediumContainerId,
 
     onLoadingChanged: function (loading) {
@@ -104,17 +13,10 @@ window.onload = async () => {
     },
 
     onCameraInteraction: function () {
-      if (flagInterract) {
-        document.getElementsByClassName("drag-and-scroll")[0].style.display =
-          "none";
-
         Unlimited3D.enableAutoRotate({
           enable: false,
         });
-
-        flagInterract = false;
       }
-    },
   };
 
   const threedium = new Threedium();
@@ -161,13 +63,18 @@ window.onload = async () => {
 
   const genericCreatePartsButtons = (parts, container, selected) => {
     parts.forEach((name) => {
+      const partImage = document.createElement('img')
       const button = document.createElement("button");
-      button.innerText = name.includes("#")
-        ? name.slice(0, name.indexOf("#"))
-        : name;
+      
       button.id = name;
       button.addEventListener("click", handlePartInput);
+      
+      const partRealName = partNamesReference[skuReference[sku].solution3DID][name];
+      partImage.src = partImages[partRealName];
+      partImage.className = partImageOnPartClassName;
+      partImage.id = name
 
+      button.appendChild(partImage)
       if (name === selected) {
         button.disabled = true;
         button.className = selectedPartButtonClassName;
@@ -237,16 +144,14 @@ window.onload = async () => {
     const partImage = document.createElement('img');
     
     materialSubContainer.className = materialSubContainerClassName
-    const partRealName = partNamesReference[id][part] // tirar o id no deploy
-    
+    const partRealName = partNamesReference[skuReference[sku].solution3DID][part];
+
     partImage.src = partImages[partRealName]
-    partImage.className = partImageClassName
+    partImage.className = partImageOnMateiralClassName
     partContainer.appendChild(partImage);
 
-    console.log(partRealName);
-
     partContainer.id = part;
-    partContainer.className = materialContainerClassName;
+    partContainer.className = partMaterialContainerClassName;
 
     const filteredMaterials = materials.filter((material) => {
       const subMaterialPlus = material.includes('[subpart]') ? 4 : 0;
@@ -276,17 +181,15 @@ window.onload = async () => {
       const isSelected = materialsStore.state[part] === material;
 
       const button = document.createElement("button");
-      if (showImage) {
-        const materialKey = material.slice(0, material.indexOf("|")).trim().toLowerCase();
-        const image = document.createElement('img');
-        image.src = materialImages[materialKey] || "./assets/images/materials/red.jpg";
-        if(!materialImages[materialKey]) console.log(material);
-        image.style.width = "10px"
-        image.id = material
-        button.appendChild(image)
-      } else {
-        button.innerText = material;
-      }
+  
+      const materialKey = material.slice(0, material.indexOf("|")).trim().toLowerCase();
+      const image = document.createElement('img');
+      image.src = materialImages[materialKey];
+      if(!materialImages[materialKey]) console.log(material);
+      image.style.width = "10px"
+      image.id = material
+      button.appendChild(image)
+    
       
       button.id = material;
       // buttton.innerText = material;
@@ -379,7 +282,7 @@ window.onload = async () => {
 
   const saveButton = document.getElementById(saveButtonId);
 
-  saveButton.addEventListener("click", () => {
+  saveButton.addEventListener("click", async () => {
     const {
       state: { selectedTop, selectedBottom },
     } = store;
@@ -444,8 +347,9 @@ window.onload = async () => {
           selectedPartsWithIndependentMaterials.filter(
             (part) => materialsStore.state[part] === null
           );
-
-        notAllMaterialsSelected(notSelectedMaterialParts);
+        const realNames =
+          notSelectedMaterialParts.map((part) => partNamesReference[skuReference[sku].solution3DID][part]);
+        notAllMaterialsSelected(realNames);
         return;
       }
 
@@ -455,8 +359,9 @@ window.onload = async () => {
 
           const material = materialsStore.state[part];
           try {
+
             return {
-              part: partNamesReference[id][part],
+              part: partNamesReference[skuReference[sku].solution3DID][part],
               material: material.slice(0, material.indexOf("|")).trim() || "",
             };
           } catch (error) {
@@ -522,9 +427,9 @@ window.onload = async () => {
           p.startsWith(reference)
         );
         const material = materialsStore.state[dependentFromPart];
-
+        
         return {
-          part: partNamesReference[id][part],
+          part: partNamesReference[skuReference[sku].solution3DID][part],
           material: material.slice(0, material.indexOf("|")).trim(),
         };
       });
@@ -534,14 +439,24 @@ window.onload = async () => {
       ...selectedPartsWithDependentMaterials,
     ];
 
-    console.log(partsToSave);
-    sessionStorage.setItem(
-      sku,
-      JSON.stringify({
-        parts: partsToSave,
-        image: "url",
-      })
-    );
+    await new Promise((resolve, reject) => {
+      Unlimited3D.setCameraPosition(
+        { position: threedium.default_position },
+        (e) => {
+          if (e) return reject();
+          resolve();
+        }
+      );
+    });
+
+    await new Promise((r) => setTimeout(r, 1000));
+    
+    Unlimited3D.getSnapshot(snapshotSize, (e, imageUrl) => {
+      if(e) return console.log(e);
+
+      onSave(sku, partsToSave, imageUrl)
+    });
+    
   });
  
   await store._stateCallback();

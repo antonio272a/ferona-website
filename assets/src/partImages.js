@@ -1,8 +1,9 @@
 const partImages = {
+  "DR001": "./assets/images/parts/TA001.png",
   "TA001": "./assets/images/parts/TA001.png",
-  "TA002-LINE": "./assets/images/parts/TA001.png",
-  "TA002-SLEEVES": "./assets/images/parts/TA001.png",
-  "TA003": "./assets/images/parts/TA001.png",
+  "TA002": "./assets/images/parts/TA001.png",
+  "TA003-LINE": "./assets/images/parts/TA001.png",
+  "TA003-SLEEVES": "./assets/images/parts/TA001.png",
   "TB001": "./assets/images/parts/TA001.png",
   "TB002": "./assets/images/parts/TA001.png",
   "TB003-FRILL": "./assets/images/parts/TA001.png",

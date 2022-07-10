@@ -4,6 +4,9 @@ class Threedium {
     this._materials = null;
     this._original_parts = null;
     this._mannequin = null
+    this.default_position = [
+      -90.84782284952678, 1793.6076032290648, 2001.4235296012127,
+    ];
   }
 
   async init(opt) {
@@ -20,6 +23,9 @@ class Threedium {
           res();
         });
       });
+      
+      Unlimited3D.setCameraTarget({ target: [0, 1100, 0] });
+      Unlimited3D.setCameraPosition({ position: this.default_position });
 
       await new Promise((res, rej) => {
         Unlimited3D.getAvailableParts((e, result) => {
