@@ -146,7 +146,7 @@ partImageOnMaterialClassName;
     materialSubContainer.className = materialSubContainerClassName
     const partRealName = partNamesReference[skuReference[sku].solution3DID][part];
 
-    partImage.src = partImages[partRealName]
+    partImage.src = partImagesForMaterials[partRealName];
     partImage.className = partImageOnMaterialClassName
     partContainer.appendChild(partImage);
 
