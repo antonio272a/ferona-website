@@ -451,7 +451,7 @@ window.onload = async () => {
 
     await new Promise((r) => setTimeout(r, 1000));
     
-    Unlimited3D.getSnapshot(snapshotSize, (e, imageUrl) => {
+    Unlimited3D.getSnapshot({...snapshotSize, result: snapshotType}, (e, imageUrl) => {
       if(e) return console.log(e);
 
       onSave(sku, partsToSave, imageUrl)

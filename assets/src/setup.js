@@ -51,9 +51,10 @@ const onSave = (productSku, parts, image) => {
 
 // size of the snapshot on save
 const snapshotSize = { width: 1280, height: 720 };
+const snapshotType = 'url' // types: 'url' / 'blob' / 'base64'  
 
 // In the application the sku will come from somewhere like the URL;
-const sku = "sku-33";
+const sku = "sku-30";
 
 // reference for the threedium based on the sku's;
 
