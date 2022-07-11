@@ -1,5 +1,4 @@
 window.onload = async () => {
-partImageOnMaterialClassName;
 
   const options = {
     distID: "latest",
