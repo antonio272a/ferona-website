@@ -22,6 +22,7 @@ partImageOnMaterialClassName;
   const threedium = new Threedium();
   await threedium.init(options);
   await threedium.setDefaultMateirals();
+  threedium.setCameraControl();
 
   // add the selectedMaterials keys to the store
   const selectedMaterials = {};
@@ -460,4 +461,17 @@ partImageOnMaterialClassName;
   });
  
   await store._stateCallback();
+  // Unlimited3D.updateCameraControl(
+  //   {
+  //     name: "CC Publish",
+  //     minAzimuthAngle: -360,
+  //     maxAzimuthAngle: 360,
+  //     minPolarAngle: 0.5,
+  //     maxPolarAngle: 2.5,
+  //     panSpeed: 1,
+  //     minDistance: 900,
+  //     maxDistance: 1900,
+  //   },
+  //   (e, r) => console.log(e, r)
+  // );
 }

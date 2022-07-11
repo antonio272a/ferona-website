@@ -26,7 +26,7 @@ class Threedium {
       
       Unlimited3D.setCameraTarget({ target: [0, 1100, 0] });
       Unlimited3D.setCameraPosition({ position: this.default_position });
-
+      
       await new Promise((res, rej) => {
         Unlimited3D.getAvailableParts((e, result) => {
           if (e) {
@@ -87,6 +87,22 @@ class Threedium {
         resolve();
       });
     });
+  }
+
+  setCameraControl = () => {
+    Unlimited3D.updateCameraControl(
+      {
+        name: "CC Publish",
+        minAzimuthAngle: -360,
+        maxAzimuthAngle: 360,
+        minPolarAngle: 0.5,
+        maxPolarAngle: 2.5,
+        panSpeed: 1,
+        minDistance: 900,
+        maxDistance: 2500,
+      },
+      (e, r) => console.log(e, r)
+    );
   }
 
   hideMannequin = () => {
