@@ -186,7 +186,6 @@ window.onload = async () => {
       const image = document.createElement('img');
       image.src = materialImages[materialKey];
       if(!materialImages[materialKey]) console.log(material);
-      image.style.width = "10px"
       image.id = material
       button.appendChild(image)
     
@@ -421,7 +420,6 @@ window.onload = async () => {
         );
       })
       .map((part) => {
-        const { solution3DID: id } = skuReference[sku];
         const reference = part.slice(part.indexOf("#") + 1, part.indexOf("$"));
         const dependentFromPart = threedium.parts.find((p) =>
           p.startsWith(reference)

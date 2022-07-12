@@ -101,7 +101,7 @@ class Threedium {
         minDistance: 900,
         maxDistance: 2500,
       },
-      (e, r) => console.log(e, r)
+      (e, r) => { if(e) console.log(e) }
     );
   }
 
