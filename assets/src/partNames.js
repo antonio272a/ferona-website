@@ -302,7 +302,6 @@ const partNamesReference = {
   42507: {
     name: "TD001",
     "[top](01)": "TD001",
-    "[bottom](01)": "SD002",
   },
 };
 
