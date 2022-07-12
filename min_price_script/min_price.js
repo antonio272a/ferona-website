@@ -120,7 +120,7 @@ const partsPrices = {
 
 const calculateTotal = (result) => {
   const finalMultiplier = 3
-  
+  // console.log(result);
   const materialPrices = result.reduce((acc, {part, material}) => (
     acc + (materialsPrices[material] * partsMeters[part])
   ), 0);
@@ -136,94 +136,136 @@ const calculateTotal = (result) => {
   return finalPrice;
 }
 
-window.onload = async () => {
-  const options = {
-    distID: "latest",
-    solution3DName: skuReference[sku].solution3DName,
-    projectName: "first-project",
-    solution3DID: skuReference[sku].solution3DID,
-    containerID: threediumContainerId,
-
-    onLoadingChanged: function (loading) {
-      loadingBar.style.width = loading.progress + "%";
-    },
-
-    onCameraInteraction: function () {
-      Unlimited3D.enableAutoRotate({
-        enable: false,
-      });
-    }
-  };
-
-  const threedium = new Threedium();
-  await threedium.init(options);
-  await threedium.setDefaultMateirals();
-  threedium.setCameraControl();
-  const relevantParts = threedium.parts.filter((part) => !part.includes('#') || part.includes('$') );
-
-  const getCheapestMaterialsForPart = (part) => {
-    const { materials } = threedium;      
-
-    const filteredMaterials = materials.filter((material) => {
-      const subMaterialPlus = material.includes("[subpart]") ? 4 : 0;
-      const materialReference = material.slice(
-        material.indexOf("["),
-        material.indexOf(")") + 1 + subMaterialPlus
-      );
+const calculateTotalForChart = async (sku) => {
+  return new Promise(async (resolve, reject) => {
+    const testContainer = document.getElementById('test-container')
+    const skuDiv = document.createElement('div')
+    skuDiv.id = sku
+    testContainer.appendChild(skuDiv)
+    const options = {
+      distID: "latest",
+      solution3DName: skuReference[sku].solution3DName,
+      projectName: "first-project",
+      solution3DID: skuReference[sku].solution3DID,
+      containerID: sku,
+      
+      onLoadingChanged: function (loading) {
+        loadingBar.style.width = loading.progress + "%";
+      },
+      
+      onCameraInteraction: function () {
+        Unlimited3D.enableAutoRotate({
+          enable: false,
+        });
+      }
+    };
+    
+    const threedium = new Threedium();
+    await threedium.init(options);
+    await threedium.setDefaultMateirals();
+    threedium.setCameraControl();
+    const relevantParts = threedium.parts.filter((part) => !part.includes('#') || part.includes('$') );
+    
+    const getCheapestMaterialsForPart = (part) => {
+      const { materials } = threedium;      
+      
+      const filteredMaterials = materials.filter((material) => {
+        const subMaterialPlus = material.includes("[subpart]") ? 4 : 0;
+        const materialReference = material.slice(
+          material.indexOf("["),
+          material.indexOf(")") + 1 + subMaterialPlus
+          );
       const isMaterial = materialReference.startsWith(
         part.slice(0, part.indexOf(")") + 1 + subMaterialPlus)
-      );
-      if (material.match(/{/g)) {
-        const isSubMaterial = material.match(/{/g).length > 2;
-        return isMaterial && !isSubMaterial;
-      }
-
-      return isMaterial;
-    }).map((material) => material.slice(0, material.indexOf('|')).trim().toLowerCase());
-    const sortedByPrice = filteredMaterials.sort((a, b) => materialsPrices[a] - materialsPrices[b]);
-    // console.log(filteredMaterials.map((mat) => ({ material: mat, price: materialsPrices[mat] })));
-    
-    return sortedByPrice[0];
-  }
-
-  const topPartAndSubParts = relevantParts.filter((part) => (
-    part.startsWith('[top](01)') || part.startsWith('[subpart][top](01)')
-  ));
-
-  const bottomPartAndSubParts = relevantParts.filter((part) => (
-    part.startsWith('[bottom](01)') || part.startsWith('[subpart][bottom](01)')
-  ));
-
-  const minorParts = [...topPartAndSubParts, ...bottomPartAndSubParts];
-
-  const cheapestCombination = minorParts.map((part) => {
-    const partName = partNamesReference[skuReference[sku].solution3DID][part]
-    
-    if(part.includes('#')) {
-      const dependsFromReference = part.slice(part.indexOf('#') + 1, part.indexOf('$'))
+        );
+        if (material.match(/{/g)) {
+          const isSubMaterial = material.match(/{/g).length > 2;
+          return isMaterial && !isSubMaterial;
+        }
+        
+        return isMaterial;
+      }).map((material) => material.slice(0, material.indexOf('|')).trim().toLowerCase());
+      const sortedByPrice = filteredMaterials.sort((a, b) => materialsPrices[a] - materialsPrices[b]);
+      // console.log(filteredMaterials.map((mat) => ({ material: mat, price: materialsPrices[mat] })));
       
-      const dependsFrom = relevantParts.find((p) => p.startsWith(dependsFromReference));
-
+      return sortedByPrice[0];
+    }
+        
+    const topPartAndSubParts = relevantParts.filter((part) => (
+      part.startsWith('[top](01)') || part.startsWith('[subpart][top](01)')
+      ));
+      
+    const bottomPartAndSubParts = relevantParts.filter((part) => (
+      part.startsWith('[bottom](01)') || part.startsWith('[subpart][bottom](01)')
+    ));
+        
+    const minorParts = [...topPartAndSubParts, ...bottomPartAndSubParts];
+    
+    const cheapestCombination = minorParts.map((part) => {
+      const partName = partNamesReference[skuReference[sku].solution3DID][part]
+      
+      if(part.includes('#')) {
+        const dependsFromReference = part.slice(part.indexOf('#') + 1, part.indexOf('$'))
+        
+        const dependsFrom = relevantParts.find((p) => p.startsWith(dependsFromReference));
+        
+        return {
+          part: partName,
+          material: getCheapestMaterialsForPart(dependsFrom),
+        };
+      }
+      
       return {
         part: partName,
-        material: getCheapestMaterialsForPart(dependsFrom),
+        material: getCheapestMaterialsForPart(part),
       };
-    }
+    });
+        
+    // console.log(cheapestCombination);
+    const finalPrice = calculateTotal(cheapestCombination);
+    // console.log(skuReference[sku].solution3DName, `${finalPrice.toFixed(2)} EUR`);
+    resolve(`${skuReference[sku].solution3DName}\t${finalPrice.toFixed(2)} EUR`)
+    // const input = document.createElement('input')
+    // input.type = 'text'
+    // input.value = `${finalPrice.toFixed(2)} EUR`;
+    // document.getElementById('test-btn').appendChild(input)
+    // input.focus()
+    // navigator.clipboard.writeText(input.value);
+  })
+}
 
-    return {
-      part: partName,
-      material: getCheapestMaterialsForPart(part),
-    };
-  });
+const results = [];
+const executeChartCalc = async (array, index) => {
+  if(!array[index]) return;
+  const result = await calculateTotalForChart(array[index]);
+  console.log(array[index], result);
+  results.push(result);
+  return executeChartCalc(array, index + 1);
+}
 
-  console.log(cheapestCombination);
-  const finalPrice = calculateTotal(cheapestCombination);
-  console.log(skuReference[sku].solution3DName, `${finalPrice.toFixed(2)} EUR`);
+window.onload = async() => {
   
-  const input = document.createElement('input')
-  input.type = 'text'
-  input.value = `${finalPrice.toFixed(2)} EUR`;
-  document.getElementById('test-btn').appendChild(input)
-  input.focus()
-  navigator.clipboard.writeText(input.value);
+  const startBtn = document.getElementById('toggle-mannequin-btn');
+  startBtn.innerText = 'start the count';
+  startBtn.className = 'btn btn-success btn-lg';
+  startBtn.addEventListener('click', async () => {
+    const skus = Object.keys(skuReference);
+    await executeChartCalc(skus, 0);
+    // console.log(results);
+    const resultsText = results.reduce((acc, act) => (`${acc}${act}\r`), '')
+    const testBtn = document.getElementById('test-btn');
+    testBtn.innerText = 'Done! click here to copy the result'
+    const audio = new Audio('./min_price_script/alert.mp3');
+    audio.play()
+    testBtn.addEventListener('click', async () => {
+      navigator.clipboard.writeText(resultsText);
+      testBtn.innerText = 'Copied!';
+      await new Promise((r) => setTimeout(() => r(), 1000))
+      testBtn.innerText = "Done! click here to copy the result";
+    })
+  })
+    // await Promise.all(teste);
+    // console.log(teste);
+  // const teste = await calculateTotalForChart(sku)
+  
 }
