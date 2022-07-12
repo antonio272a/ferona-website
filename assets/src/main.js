@@ -446,7 +446,7 @@ window.onload = async () => {
         }
       );
     });
-
+    threedium.showMannequin();
     await new Promise((r) => setTimeout(r, 1000));
     
     Unlimited3D.getSnapshot({...snapshotSize, result: snapshotType}, (e, imageUrl) => {
@@ -458,17 +458,4 @@ window.onload = async () => {
   });
  
   await store._stateCallback();
-  // Unlimited3D.updateCameraControl(
-  //   {
-  //     name: "CC Publish",
-  //     minAzimuthAngle: -360,
-  //     maxAzimuthAngle: 360,
-  //     minPolarAngle: 0.5,
-  //     maxPolarAngle: 2.5,
-  //     panSpeed: 1,
-  //     minDistance: 900,
-  //     maxDistance: 1900,
-  //   },
-  //   (e, r) => console.log(e, r)
-  // );
 }
