@@ -361,7 +361,7 @@ window.onload = async () => {
 
             return {
               part: partNamesReference[skuReference[sku].solution3DID][part],
-              material: material.slice(0, material.indexOf("|")).trim() || "",
+              material: material.slice(0, material.indexOf("|")).trim().toLowerCase() || "",
             };
           } catch (error) {
             return part;
@@ -428,7 +428,7 @@ window.onload = async () => {
         
         return {
           part: partNamesReference[skuReference[sku].solution3DID][part],
-          material: material.slice(0, material.indexOf("|")).trim(),
+          material: material.slice(0, material.indexOf("|")).trim().toLowerCase(),
         };
       });
 
