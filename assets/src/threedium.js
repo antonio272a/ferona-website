@@ -24,7 +24,7 @@ class Threedium {
         });
       });
       
-      Unlimited3D.setCameraTarget({ target: [0, 1100, 0] });
+      Unlimited3D.setCameraTarget({ target: [0, 1000, 0] });
       Unlimited3D.setCameraPosition({ position: this.default_position });
       
       await new Promise((res, rej) => {

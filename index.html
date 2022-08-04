@@ -17,35 +17,33 @@
     </div>
 
     <a href="#" id="ar-button" class="AR-icon">
-        <img src="./assets/images/ar_icon.svg" alt="AR-icon" style="display:none;">
+        <img src="./assets/images/ar_icon.svg" alt="AR-icon" style="display: none;">
     </a>
-
-    <div class="model">
-        <div id="container3d_replace"></div>
-        <div class="loadingContent" id="loadingContent">
-            Loading 3D Model
-            <div class="loading">
-                <div id="loadingBar" class="barBlue"></div>
+    <div class="d-flex flex-column">
+        <div class="model">
+            <div id="container3d_replace"></div>
+            <div class="loadingContent" id="loadingContent">
+                Loading 3D Model
+                <div class="loading">
+                    <div id="loadingBar" class="barBlue"></div>
+                </div>
             </div>
         </div>
+        <div class="container d-flex flex-column align-items-center border border-dark">
+            <div id="top-part-container" class="d-flex justify-content-around border border-success"></div>
+            <div id="top-material-container" class="d-flex justify-content-around border border-info"></div>
+            <div id="bottom-part-container" class="d-flex justify-content-around border border-danger"></div>
+            <div id="bottom-material-container" class="d-flex justify-content-around border border-primary"></div>
+        </div>
     </div>
-    <div class="container d-flex flex-column align-items-center border border-dark">
-        <div id="top-part-container" class="d-flex justify-content-around border border-success"></div>
-        <div id="top-material-container" class="d-flex justify-content-around border border-info"></div>
-        <div id="bottom-part-container" class="d-flex justify-content-around border border-danger"></div>
-        <div id="bottom-material-container" class="d-flex justify-content-around border border-primary"></div>
-        <div class="drag-and-scroll">
-    </div>
-        <img src="./assets/images/drag_and_scroll.png" alt="dragAndScroll" class="drag-and-scroll-image">
-        <!-- <p class="drag-and-scroll-p">
-            drag and scroll to zoom and rotate
-        </p> -->
-    </div>
+        
+
     <section id="test-container"></section>
     <button type="button" id="save-btn" class="btn btn-success btn-lg">Save</button>
     <button type="button" id="toggle-mannequin-btn" class="btn btn-primary btn-lg">Toggle Mannequin</button>
     <button type="button" id="test-btn" class="btn btn-warning btn-lg">test</button>
     <script src="https://distcdn.unlimited3d.com/pres/v/2.0.15/unlimited3d.min.js"></script>  
+    <script src="https://cdn.unlimited3d.com/js/deviceCheck.js"></script>
     <script type="text/javascript" src="./assets/src/materialImages.js"></script>
     <script type="text/javascript" src="./assets/src/partImagesForMaterial.js"></script>
     <script type="text/javascript" src="./assets/src/setup.js"></script>

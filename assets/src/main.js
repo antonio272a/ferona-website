@@ -1,5 +1,4 @@
 window.onload = async () => {
-
   const options = {
     distID: "latest",
     solution3DName: skuReference[sku].solution3DName,
@@ -12,10 +11,10 @@ window.onload = async () => {
     },
 
     onCameraInteraction: function () {
-        Unlimited3D.enableAutoRotate({
-          enable: false,
-        });
-      }
+      Unlimited3D.enableAutoRotate({
+        enable: false,
+      });
+    },
   };
 
   const threedium = new Threedium();
@@ -63,18 +62,19 @@ window.onload = async () => {
 
   const genericCreatePartsButtons = (parts, container, selected) => {
     parts.forEach((name) => {
-      const partImage = document.createElement('img')
+      const partImage = document.createElement("img");
       const button = document.createElement("button");
-      
+
       button.id = name;
       button.addEventListener("click", handlePartInput);
-      
-      const partRealName = partNamesReference[skuReference[sku].solution3DID][name];
+
+      const partRealName =
+        partNamesReference[skuReference[sku].solution3DID][name];
       partImage.src = partImages[partRealName];
       partImage.className = partImageOnPartClassName;
-      partImage.id = name
+      partImage.id = name;
 
-      button.appendChild(partImage)
+      button.appendChild(partImage);
       if (name === selected) {
         button.disabled = true;
         button.className = selectedPartButtonClassName;
@@ -123,16 +123,18 @@ window.onload = async () => {
   };
 
   const toggleDisabledMaterialButtons = (material, disabled) => {
-    const reference = material.slice(material.indexOf('|') + 1, material.indexOf('{')).trim()
+    const reference = material
+      .slice(material.indexOf("|") + 1, material.indexOf("{"))
+      .trim();
     const possibleButtons = threedium.materials.filter((mat) => {
       const matReference = mat.slice(mat.indexOf("|") + 1).trim();
       return matReference.startsWith(reference);
-    })
+    });
     possibleButtons.forEach((possibleButton) => {
       const button = document.getElementById(possibleButton);
-      if(button) button.disabled = disabled;
-    })
-  }
+      if (button) button.disabled = disabled;
+    });
+  };
 
   const createMaterialsButtons = (part, container) => {
     const {
@@ -140,21 +142,22 @@ window.onload = async () => {
     } = store;
     const { applyMaterials } = threedium;
     const partContainer = document.createElement("div");
-    const materialSubContainer = document.createElement('div')
-    const partImage = document.createElement('img');
-    
-    materialSubContainer.className = materialSubContainerClassName
-    const partRealName = partNamesReference[skuReference[sku].solution3DID][part];
+    const materialSubContainer = document.createElement("div");
+    const partImage = document.createElement("img");
+
+    materialSubContainer.className = materialSubContainerClassName;
+    const partRealName =
+      partNamesReference[skuReference[sku].solution3DID][part];
 
     partImage.src = partImagesForMaterials[partRealName];
-    partImage.className = partImageOnMaterialClassName
+    partImage.className = partImageOnMaterialClassName;
     partContainer.appendChild(partImage);
 
     partContainer.id = part;
     partContainer.className = partMaterialContainerClassName;
 
     const filteredMaterials = materials.filter((material) => {
-      const subMaterialPlus = material.includes('[subpart]') ? 4 : 0;
+      const subMaterialPlus = material.includes("[subpart]") ? 4 : 0;
       const materialReference = material.slice(
         material.indexOf("["),
         material.indexOf(")") + 1 + subMaterialPlus
@@ -181,15 +184,17 @@ window.onload = async () => {
       const isSelected = materialsStore.state[part] === material;
 
       const button = document.createElement("button");
-  
-      const materialKey = material.slice(0, material.indexOf("|")).trim().toLowerCase();
-      const image = document.createElement('img');
+
+      const materialKey = material
+        .slice(0, material.indexOf("|"))
+        .trim()
+        .toLowerCase();
+      const image = document.createElement("img");
       image.src = materialImages[materialKey];
-      if(!materialImages[materialKey]) console.log(material);
-      image.id = material
-      button.appendChild(image)
-    
-      
+      if (!materialImages[materialKey]) console.log(material);
+      image.id = material;
+      button.appendChild(image);
+
       button.id = material;
       // buttton.innerText = material;
 
@@ -209,7 +214,7 @@ window.onload = async () => {
 
       materialSubContainer.appendChild(button);
     });
-    partContainer.appendChild(materialSubContainer)
+    partContainer.appendChild(materialSubContainer);
     container.appendChild(partContainer);
   };
 
@@ -296,10 +301,8 @@ window.onload = async () => {
         ? selectedBottom.slice(0, selectedBottom.indexOf("{"))
         : selectedBottom;
 
-    
-
-    const selectedPartsWithIndependentMaterials = threedium.parts
-      .filter((part) => {
+    const selectedPartsWithIndependentMaterials = threedium.parts.filter(
+      (part) => {
         const isPart = part === selectedTop || part === selectedBottom;
         const isSubNode =
           part.startsWith(`[subpart]${selectedTopReference}`) ||
@@ -334,39 +337,41 @@ window.onload = async () => {
           (isPart || isBottomSubPart || isTopSubPart || isSubNode) &&
           hasIndependentColor
         );
-      });
-
-      const allColorsSelected = selectedPartsWithIndependentMaterials.every(
-        (part) => materialsStore.state[part] !== null
-      );
-
-
-      if (!allColorsSelected) {
-        const notSelectedMaterialParts =
-          selectedPartsWithIndependentMaterials.filter(
-            (part) => materialsStore.state[part] === null
-          );
-        const realNames =
-          notSelectedMaterialParts.map((part) => partNamesReference[skuReference[sku].solution3DID][part]);
-        notAllMaterialsSelected(realNames);
-        return;
       }
+    );
 
-      const mappedSelectedPartsWithIndependentMaterials =
-        selectedPartsWithIndependentMaterials.map((part) => {
-          const { solution3DID: id } = skuReference[sku];
+    const allColorsSelected = selectedPartsWithIndependentMaterials.every(
+      (part) => materialsStore.state[part] !== null
+    );
 
-          const material = materialsStore.state[part];
-          try {
+    if (!allColorsSelected) {
+      const notSelectedMaterialParts =
+        selectedPartsWithIndependentMaterials.filter(
+          (part) => materialsStore.state[part] === null
+        );
+      const realNames = notSelectedMaterialParts.map(
+        (part) => partNamesReference[skuReference[sku].solution3DID][part]
+      );
+      notAllMaterialsSelected(realNames);
+      return;
+    }
 
-            return {
-              part: partNamesReference[skuReference[sku].solution3DID][part],
-              material: material.slice(0, material.indexOf("|")).trim().toLowerCase() || "",
-            };
-          } catch (error) {
-            return part;
-          }
-        });
+    const mappedSelectedPartsWithIndependentMaterials =
+      selectedPartsWithIndependentMaterials.map((part) => {
+        const { solution3DID: id } = skuReference[sku];
+
+        const material = materialsStore.state[part];
+        try {
+          return {
+            part: partNamesReference[skuReference[sku].solution3DID][part],
+            material:
+              material.slice(0, material.indexOf("|")).trim().toLowerCase() ||
+              "",
+          };
+        } catch (error) {
+          return part;
+        }
+      });
 
     const selectedPartsWithDependentMaterials = threedium.parts
       .filter((part) => {
@@ -425,10 +430,13 @@ window.onload = async () => {
           p.startsWith(reference)
         );
         const material = materialsStore.state[dependentFromPart];
-        
+
         return {
           part: partNamesReference[skuReference[sku].solution3DID][part],
-          material: material.slice(0, material.indexOf("|")).trim().toLowerCase(),
+          material: material
+            .slice(0, material.indexOf("|"))
+            .trim()
+            .toLowerCase(),
         };
       });
 
@@ -448,14 +456,53 @@ window.onload = async () => {
     });
     threedium.showMannequin();
     await new Promise((r) => setTimeout(r, 1000));
-    
-    Unlimited3D.getSnapshot({...snapshotSize, result: snapshotType}, (e, imageUrl) => {
-      if(e) return console.log(e);
 
-      onSave(sku, partsToSave, imageUrl)
-    });
-    
+    Unlimited3D.getSnapshot(
+      { ...snapshotSize, result: snapshotType },
+      (e, imageUrl) => {
+        if (e) return console.log(e);
+
+        onSave(sku, partsToSave, imageUrl);
+      }
+    );
   });
- 
+
   await store._stateCallback();
-}
+  const arButton = document.getElementById('ar-button')
+  if (checkAr() == "android") {
+    arButton.setAttribute("rel", "ar");
+    arButton.setAttribute(
+      "href",
+      "intent://arvr.google.com/scene-viewer/1.0?file=.glb#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=%23;end;"
+    );
+
+    arButton.addEventListener("click", arMobile);
+  } else if (checkAr() == "ios" || checkAr() == "ipad") {
+    arButton.setAttribute("rel", "ar");
+    arButton.setAttribute("href", ".usdz");
+
+    arButton.addEventListener("click", arMobile);
+  } else {
+    arButton.addEventListener("click", function () {
+      if (document.querySelector(".QRcode").style.display == "flex")
+        document.querySelector(".QRcode").style.display = "none";
+      else document.querySelector(".QRcode").style.display = "flex";
+    });
+    document
+      .getElementById("closeQRcode")
+      .addEventListener("click", function () {
+        document.querySelector(".QRcode").style.display = "none";
+        // analitika ovde
+      });
+
+    arButton.addEventListener("click", arMobile);
+  }
+
+  function arMobile() {
+    // gtag('event', 'Interact', {
+    //     'event_category': 'Click',
+    //     'event_label': "ime",
+    //     'value': 'AR Icon Click',
+    // });
+  }
+};

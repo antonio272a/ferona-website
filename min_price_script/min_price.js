@@ -133,6 +133,7 @@ const calculateTotal = (result) => {
   // console.log(partPrices, materialPrices);
   const finalPrice = (partPrices + materialPrices) * finalMultiplier
 
+  
   return finalPrice;
 }
 
