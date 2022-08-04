@@ -1,4 +1,4 @@
-window.onload = async () => {
+const load = async (sku) => {
   const options = {
     distID: "latest",
     solution3DName: skuReference[sku].solution3DName,
@@ -506,3 +506,17 @@ window.onload = async () => {
     // });
   }
 };
+
+const select = document.getElementById('product-select');
+const selectBtn = document.getElementById('product-select-btn');
+
+Object.keys(skuReference).forEach((sku) => {
+  const option = document.createElement('option');
+  option.text = skuReference[sku].solution3DName;
+  option.value = sku;
+  select.appendChild(option);
+});
+
+selectBtn.addEventListener('click', () => {
+  load(select.value)
+});
