@@ -12,7 +12,6 @@ class Store {
     if(!state instanceof Object) {
       throw new TypeError('State must be object');
     }
-    
     this._state = { ...this._state, ...state };
     await this._stateCallback();
   }
