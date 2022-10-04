@@ -2,6 +2,10 @@ window.onload = async () => {
   const params = new URLSearchParams(window.location.search);
   const isBridal = params.get('scb') === 'bridal';
 
+
+  const partsToShowOptions = ['both', 'top', 'bottom'];
+  let partsToShow = 'both';
+
   const options = {
     distID: 'latest',
     solution3DName: skuReference[sku].solution3DName,
@@ -111,10 +115,12 @@ window.onload = async () => {
     } = store;
     const topParts = parts.filter((part) => part.startsWith('[top]'));
     const bottomParts = parts.filter((part) => part.startsWith('[bottom]'));
-
-    genericCreatePartsButtons(topParts, topPartContainer, selectedTop);
-
-    genericCreatePartsButtons(bottomParts, bottomPartContainer, selectedBottom);
+    if(partsToShow === 'both' || partsToShow === 'top') {
+      genericCreatePartsButtons(topParts, topPartContainer, selectedTop);
+    }
+    if(partsToShow === 'both' || partsToShow === 'bottom') {
+      genericCreatePartsButtons(bottomParts, bottomPartContainer, selectedBottom);
+    }
   };
 
   const getSubParts = (selectedPart) => {
@@ -239,7 +245,7 @@ window.onload = async () => {
       state: { selectedTop, selectedBottom },
     } = store;
 
-    if (selectedTop) {
+    if (selectedTop && (partsToShow === 'both' || partsToShow === 'top')) {
       const topSubParts = getSubParts(selectedTop);
 
       if (!selectedTop.includes('#')) {
@@ -253,7 +259,7 @@ window.onload = async () => {
       });
     }
 
-    if (selectedBottom) {
+    if (selectedBottom && (partsToShow === 'both' || partsToShow === 'bottom')) {
       const bottomSubParts = getSubParts(selectedBottom);
 
       if (!selectedBottom.includes('#')) {
@@ -273,9 +279,11 @@ window.onload = async () => {
     const {
       state: { selectedTop, selectedBottom },
     } = store;
-    if (selectedTop) await selectPart(selectedTop);
+    await threedium.hideAllParts();
+    
+    if (selectedTop && (partsToShow === 'both' || partsToShow === 'top')) await selectPart(selectedTop);
 
-    if (selectedBottom) await selectPart(selectedBottom);
+    if (selectedBottom &&  (partsToShow === 'both' || partsToShow === 'bottom')) await selectPart(selectedBottom);
   };
 
   store.setStateCallback(async () => {
@@ -364,7 +372,15 @@ window.onload = async () => {
           hasIndependentColor
         );
       }
-    );
+    ).filter((part) => {
+      const topRegex = /^\[top\]/;
+      const subpartTopRegex = /^\[subpart\]\[top\]/;
+      const bottomRegex = /^\[bottom\]/;
+      const subpartBottomRegex = /^\[subpart\]\[bottom\]/;
+      if(partsToShow === 'both') return true;
+      if(partsToShow === 'top') return (topRegex.test(part) || subpartTopRegex.test(part))
+      if(partsToShow === 'bottom') return (bottomRegex.test(part) || subpartBottomRegex.test(part))
+    });
 
     const allColorsSelected = selectedPartsWithIndependentMaterials.every(
       (part) => materialsStore.state[part] !== null
@@ -397,7 +413,7 @@ window.onload = async () => {
         } catch (error) {
           return part;
         }
-      });
+      })
 
     const selectedPartsWithDependentMaterials = threedium.parts
       .filter((part) => {
@@ -449,6 +465,14 @@ window.onload = async () => {
           (isPart || isSubPart || isSubPartFromSubPart) &&
           (isDependentFromSubPart || isDependent)
         );
+      }).filter((part) => {
+        const topRegex = /^\[top\]/;
+        const subpartTopRegex = /^\[subpart\]\[top\]/;
+        const bottomRegex = /^\[bottom\]/;
+        const subpartBottomRegex = /^\[subpart\]\[bottom\]/;
+        if(partsToShow === 'both') return true;
+        if(partsToShow === 'top') return (topRegex.test(part) || subpartTopRegex.test(part))
+        if(partsToShow === 'bottom') return (bottomRegex.test(part) || subpartBottomRegex.test(part))
       })
       .map((part) => {
         const reference = part.slice(part.indexOf('#') + 1, part.indexOf('$'));
@@ -470,7 +494,7 @@ window.onload = async () => {
       ...mappedSelectedPartsWithIndependentMaterials,
       ...selectedPartsWithDependentMaterials,
     ];
-
+    console.log(partsToSave);
     await new Promise((resolve, reject) => {
       Unlimited3D.setCameraPosition(
         { position: threedium.default_position },
@@ -495,6 +519,22 @@ window.onload = async () => {
 
   await store._stateCallback();
   await materialsStore._stateCallback();
+
+  const topButton = document.getElementById('top-btn');
+  const bothButton = document.getElementById('both-btn');
+  const bottomButton = document.getElementById('bottom-btn');
+  topButton.addEventListener('click', () => {
+    partsToShow = 'top';
+    store._stateCallback();
+  })
+  bottomButton.addEventListener('click', () => {
+    partsToShow = 'bottom';
+    store._stateCallback();
+  })
+  bothButton.addEventListener('click', () => {
+    partsToShow = 'both';
+    store._stateCallback();
+  })
 
   const arButton = document.getElementById('ar-button');
   if (checkAr() == 'android') {

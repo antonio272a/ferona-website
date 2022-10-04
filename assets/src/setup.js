@@ -192,7 +192,7 @@ const snapshotSize = { width: 1280, height: 720 };
 const snapshotType = 'url' // types: 'url' / 'blob' / 'base64'  
 
 // In the application the sku will come from somewhere like the URL;
-const sku = 'sku-0';
+const sku = 'sku-11'; // 11
 
 // reference for the threedium based on the sku's;
 

@@ -3,7 +3,7 @@ class Threedium {
     this._parts = null;
     this._materials = null;
     this._original_parts = null;
-    this._mannequin = null
+    this._mannequin = null;
     this.default_position = [
       -90.84782284952678, 1793.6076032290648, 2001.4235296012127,
     ];
@@ -23,10 +23,10 @@ class Threedium {
           res();
         });
       });
-      
+
       Unlimited3D.setCameraTarget({ target: [0, 1000, 0] });
       Unlimited3D.setCameraPosition({ position: this.default_position });
-      
+
       await new Promise((res, rej) => {
         Unlimited3D.getAvailableParts((e, result) => {
           if (e) {
@@ -67,7 +67,7 @@ class Threedium {
           });
           this._parts = mappedParts;
           this._original_parts = result.map(({ name }) => name);
-          
+
           const mannequinRegex = /^mannequin/i;
           this._mannequin = this._original_parts.find((part) =>
             mannequinRegex.test(part.trim())
@@ -101,13 +101,36 @@ class Threedium {
         minDistance: 900,
         maxDistance: 2500,
       },
-      (e, r) => { if(e) console.log(e) }
+      (e, r) => {
+        if (e) console.log(e);
+      }
     );
-  }
+  };
 
   hideMannequin = () => {
     Unlimited3D.hideParts({
       parts: [this._mannequin],
+    });
+  };
+
+  hideAllParts = () => {
+    const mannequinRegex = /^mannequin/i;
+    const partsToHide = this._original_parts.filter((part) =>
+      !mannequinRegex.test(part.trim())
+    );
+    
+    return new Promise((resolve, reject) => {
+      Unlimited3D.hideParts(
+        {
+          parts: partsToHide,
+        },
+        (e) => {
+          if (e) {
+            return reject();
+          }
+          resolve();
+        }
+      );
     });
   };
 
@@ -218,27 +241,30 @@ class Threedium {
 
   applyMaterials = (material) => {
     return new Promise((resolve, reject) => {
-      const subpartPlus = material.includes('[subpart]') ? 4 : 0
+      const subpartPlus = material.includes("[subpart]") ? 4 : 0;
       const materialReferenceString = material
-      .slice(material.indexOf("|") + 1, material.indexOf(")") + 1 + subpartPlus)
-      .trim();
-      
+        .slice(
+          material.indexOf("|") + 1,
+          material.indexOf(")") + 1 + subpartPlus
+        )
+        .trim();
+
       const materialNumber = material.slice(
         material.indexOf("{") + 1,
         material.indexOf("}")
-        );
-        
-        const materialParts = this._original_parts.filter((part) => {
-          const nodePart = part.slice(part.indexOf(":") + 1).trim();
-          const objectPart = part.trim();
-          const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
-          const isPart = actualObj.startsWith(materialReferenceString);
-          const isDependent = actualObj.includes(`#${materialReferenceString}`);
-          
-          return isPart || isDependent;
-        });
-        
-        const anotherMaterialParts = materialParts
+      );
+
+      const materialParts = this._original_parts.filter((part) => {
+        const nodePart = part.slice(part.indexOf(":") + 1).trim();
+        const objectPart = part.trim();
+        const actualObj = objectPart.startsWith("[") ? objectPart : nodePart;
+        const isPart = actualObj.startsWith(materialReferenceString);
+        const isDependent = actualObj.includes(`#${materialReferenceString}`);
+
+        return isPart || isDependent;
+      });
+
+      const anotherMaterialParts = materialParts
         .map((part) => {
           const nodePart = part.slice(part.indexOf(":") + 1).trim();
           const objectPart = part.trim();
@@ -249,56 +275,56 @@ class Threedium {
           const otherMaterialRegex = /\/[0-9]{2}/;
           return otherMaterialRegex.test(part);
         });
-        
-        const filteredParts = materialParts.filter((p) => {
-          const haveAnotherMaterial = anotherMaterialParts.includes(p);
-          if (!haveAnotherMaterial) {
-            return true;
-          }
-          
+
+      const filteredParts = materialParts.filter((p) => {
+        const haveAnotherMaterial = anotherMaterialParts.includes(p);
+        if (!haveAnotherMaterial) {
+          return true;
+        }
+
+        const firstBar = p.indexOf("/");
+        const secondBar = p.indexOf("/", firstBar + 1);
+        const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
+
+        const isTheMaterialSelected = otherMaterials.includes(materialNumber);
+
+        return !isTheMaterialSelected;
+      });
+
+      const changeOtherMaterials = () => {
+        anotherMaterialParts.forEach((p) => {
           const firstBar = p.indexOf("/");
           const secondBar = p.indexOf("/", firstBar + 1);
           const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
-          
-          const isTheMaterialSelected = otherMaterials.includes(materialNumber);
-          
-          return !isTheMaterialSelected;
-        });
-        
-        const changeOtherMaterials = () => {
-          anotherMaterialParts.forEach((p) => {
-            const firstBar = p.indexOf("/");
-            const secondBar = p.indexOf("/", firstBar + 1);
-            const otherMaterials = p.slice(firstBar + 1, secondBar).split("-");
-            const partReference = p.slice(p.indexOf("["), firstBar);
-            
-            if (otherMaterials.includes(materialNumber)) {
-              const otherMaterial = this._materials.find((m) =>
+          const partReference = p.slice(p.indexOf("["), firstBar);
+
+          if (otherMaterials.includes(materialNumber)) {
+            const otherMaterial = this._materials.find((m) =>
               m.includes(`${partReference}{${materialNumber}}`)
-              );
-              Unlimited3D.changeMaterial({
-                parts: [p],
-                material: otherMaterial,
-              });
-            }
-          });
-        };
-        
-        Unlimited3D.changeMaterial(
-          {
-            parts: filteredParts,
-            material,
-          },
-          (e, _r) => {
-            if (e) {
-              console.log(e);
-              reject();
-              return;
-            }
-            resolve();
-            changeOtherMaterials();
+            );
+            Unlimited3D.changeMaterial({
+              parts: [p],
+              material: otherMaterial,
+            });
           }
-          );
+        });
+      };
+
+      Unlimited3D.changeMaterial(
+        {
+          parts: filteredParts,
+          material,
+        },
+        (e, _r) => {
+          if (e) {
+            console.log(e);
+            reject();
+            return;
+          }
+          resolve();
+          changeOtherMaterials();
+        }
+      );
     });
   };
 
