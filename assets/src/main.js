@@ -44,6 +44,14 @@ window.onload = async () => {
     materials: threedium.materials,
   };
 
+  const hasSkirt = threedium.parts.find((p) => {
+    const subpartBottomRegex = /^\[subpart\]\[bottom\]/;
+    const dependsFromTopRegex = /#\[top\]/;
+    const isBottomSubpart = subpartBottomRegex.test(p);
+    const dependsFromTop = dependsFromTopRegex.test(p);
+    return isBottomSubpart && dependsFromTop;
+  });
+
   if (isBridal) {
     const offWhiteMaterialRegex = /off white/i;
     const offWhiteTopMaterial = threedium._materials.find(
@@ -84,7 +92,7 @@ window.onload = async () => {
     store.setState({ [`selected${capitalizedPartType}`]: id });
   };
 
-  const genericCreatePartsButtons = (parts, container, selected) => {
+  const genericCreatePartsButtons = (parts, container, selected,) => {
     parts.forEach((name) => {
       const partImage = document.createElement('img');
       const button = document.createElement('button');
@@ -162,7 +170,7 @@ window.onload = async () => {
     });
   };
 
-  const createMaterialsButtons = (part, container) => {
+  const createMaterialsButtons = (part, container, hasImage = true) => {
     const {
       state: { materials },
     } = store;
@@ -176,7 +184,9 @@ window.onload = async () => {
 
     partImage.src = partImagesForMaterials[partRealName];
     partImage.className = partImageOnMaterialClassName;
-    partContainer.appendChild(partImage);
+    if(hasImage) {
+      partContainer.appendChild(partImage);
+    }
 
     partContainer.id = part;
     partContainer.className = partMaterialContainerClassName;
@@ -245,18 +255,30 @@ window.onload = async () => {
       state: { selectedTop, selectedBottom },
     } = store;
 
-    if (selectedTop && (partsToShow === 'both' || partsToShow === 'top')) {
+    const hasImage = !(partsToShow === 'bottom' && hasSkirt)
+    const skirtHashtagIndex = hasSkirt.indexOf('#')
+    const skirtRef = hasSkirt.slice(skirtHashtagIndex + 1, hasSkirt.indexOf(')', skirtHashtagIndex) + 1);
+
+    if (selectedTop && (partsToShow === 'both' || partsToShow === 'top' || hasSkirt)) {
       const topSubParts = getSubParts(selectedTop);
 
-      if (!selectedTop.includes('#')) {
-        createMaterialsButtons(selectedTop, topMaterialContainer);
+      if(partsToShow === 'bottom' && hasSkirt) {
+        const top = threedium.parts.find((p) => p.startsWith(skirtRef));
+        createMaterialsButtons(top, topMaterialContainer, hasImage)
+      } else {
+
+        if (!selectedTop.includes('#')) {
+          createMaterialsButtons(selectedTop, topMaterialContainer);
+        }
+        
+        topSubParts.forEach((subPart) => {
+          if (!subPart.includes('#')) {
+            createMaterialsButtons(subPart, topMaterialContainer);
+          }
+        });
+        
       }
 
-      topSubParts.forEach((subPart) => {
-        if (!subPart.includes('#')) {
-          createMaterialsButtons(subPart, topMaterialContainer);
-        }
-      });
     }
 
     if (selectedBottom && (partsToShow === 'both' || partsToShow === 'bottom')) {
