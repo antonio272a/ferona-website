@@ -83,7 +83,7 @@ const partNamesReference = {
     "[top](02){01}": "TC002",
     "[top](03){01}": "TC003",
     "[bottom](01)": "SA001-FRILL",
-    "[subpart][top](01){01}/07/#[top](01)$": "SA001-SKIRT",
+    "[subpart][bottom](01){04}/07/#[top](01)$": "SA001-SKIRT",
   },
   42494: {
     name: "SA001 TD",
@@ -129,7 +129,7 @@ const partNamesReference = {
     "[top](02){01}#[top](01)$": "TA002",
     "[top](03){01}": "TA003-SLEEVES",
     "[subpart][top](03){01}#[top](01)$": "TA003-LINE",
-    "[subpart][top](01){01}#[top](01)$": "SB001-SKIRT",
+    "[subpart][bottom](01){01}#[top](01)$": "SB001-SKIRT",
     "[bottom](01)": "SB001-FRILL",
   },
   42496: {
@@ -139,7 +139,7 @@ const partNamesReference = {
     "[top](03){01}": "TB003-FRILL",
     "[subpart][top](03){01}/06/#[top](01)$": "TB003-SLEEVES",
     "[bottom](01)": "SB001-FRILL",
-    "[subpart][top](01){01}/06-07/#[top](01)$": "SB001-SKIRT",
+    "[subpart][bottom](01){01}/06-07/#[top](01)$": "SB001-SKIRT",
   },
   42497: {
     name: "SB001 TC",
@@ -147,12 +147,12 @@ const partNamesReference = {
     "[top](02){01}": "TC002",
     "[top](03){01}": "TC003",
     "[bottom](01)": "SB001-FRILL",
-    "[subpart][top](01){01}/06/#[top](01)$": "SB001-SKIRT",
+    "[subpart][bottom](01){01}/06/#[top](01)$": "SB001-SKIRT",
   },
   42498: {
     name: "SB001 TD",
     "[top](01)": "TD001",
-    "[subpart][top](01){01}": "SB001-SKIRT",
+    "[subpart][bottom](01){01}": "SB001-SKIRT",
     "[bottom](01)": "SB001-FRILL",
   },
   42544: {
@@ -161,7 +161,7 @@ const partNamesReference = {
     "[top](02){01}#[top](01)$": "TA002",
     "[top](03){01}": "TA003-SLEEVES",
     "[subpart][top](03){01}#[top](01)$": "TA003-LINE",
-    "[subpart][top](01){01}/07/#[top](01)$": "SB002-SKIRT",
+    "[subpart][bottom](01){02}/07/#[top](01)$": "SB002-SKIRT",
     "[bottom](01)": "SB002-FRILL",
   },
   42545: {
@@ -171,14 +171,14 @@ const partNamesReference = {
     "[subpart][top](03){01}#[top](01)$": "TB003-SLEEVES",
     "[top](03){01}": "TB003-FRILL",
     "[bottom](01)": "SB002-FRILL",
-    "[subpart][top](01){01}/07/#[top](01)$": "SB002-SKIRT",
+    "[subpart][bottom](01){01}/07/#[top](01)$": "SB002-SKIRT",
   },
   42546: {
     name: "SB002 TC",
     "[top](01)": "TC001",
     "[top](02){01}": "TC002",
     "[top](03){01}": "TC003",
-    "[subpart][top](01){01}/07/#[top](01)$": "SB002-SKIRT",
+    "[subpart][bottom](01){01}/07/#[top](01)$": "SB002-SKIRT",  
     "[bottom](01)": "SB002-FRILL",
   },
   42547: {

@@ -256,8 +256,8 @@ window.onload = async () => {
     } = store;
 
     const hasImage = !(partsToShow === 'bottom' && hasSkirt)
-    const skirtHashtagIndex = hasSkirt.indexOf('#')
-    const skirtRef = hasSkirt.slice(skirtHashtagIndex + 1, hasSkirt.indexOf(')', skirtHashtagIndex) + 1);
+    const skirtHashtagIndex = hasSkirt ? hasSkirt.indexOf('#') : 0
+    const skirtRef = hasSkirt ? hasSkirt.slice(skirtHashtagIndex + 1, hasSkirt.indexOf(')', skirtHashtagIndex) + 1) : '';
 
     if (selectedTop && (partsToShow === 'both' || partsToShow === 'top' || hasSkirt)) {
       const topSubParts = getSubParts(selectedTop);
