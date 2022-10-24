@@ -342,152 +342,59 @@ window.onload = async () => {
 
   const saveButton = document.getElementById(saveButtonId);
 
-  saveButton.addEventListener('click', async () => {
-    const {
-      state: { selectedTop, selectedBottom },
-    } = store;
-
-    const selectedTopReference =
-      selectedTop.indexOf('{') > 0
-        ? selectedTop.slice(0, selectedTop.indexOf('{'))
-        : selectedTop;
-
-    const selectedBottomReference =
-      selectedBottom.indexOf('{') > 0
-        ? selectedBottom.slice(0, selectedBottom.indexOf('{'))
-        : selectedBottom;
-
-    const selectedPartsWithIndependentMaterials = threedium.parts.filter(
-      (part) => {
-        const isPart = part === selectedTop || part === selectedBottom;
-        const isSubNode =
-          part.startsWith(`[subpart]${selectedTopReference}`) ||
-          part.startsWith(`[subpart]${selectedBottomReference}`);
-        const hasIndependentColor = !part.includes('#');
-        selectedBottom.slice(
-          selectedBottom.indexOf('{') + 1,
-          selectedBottom.indexOf('}')
-        );
-        let isBottomSubPart = false;
-        let isTopSubPart = false;
-
-        if (selectedBottom.indexOf('{') > 0) {
-          part.startsWith(
-            `[bottom](${selectedBottom.slice(
-              selectedBottom.indexOf('{') + 1,
-              selectedBottom.indexOf('}')
-            )})`
+  const getPartsToSave = async () => {
+      const {
+        state: { selectedTop, selectedBottom },
+      } = store;
+  
+      const selectedTopReference =
+        selectedTop.indexOf('{') > 0
+          ? selectedTop.slice(0, selectedTop.indexOf('{'))
+          : selectedTop;
+  
+      const selectedBottomReference =
+        selectedBottom.indexOf('{') > 0
+          ? selectedBottom.slice(0, selectedBottom.indexOf('{'))
+          : selectedBottom;
+  
+      const selectedPartsWithIndependentMaterials = threedium.parts.filter(
+        (part) => {
+          const isPart = part === selectedTop || part === selectedBottom;
+          const isSubNode =
+            part.startsWith(`[subpart]${selectedTopReference}`) ||
+            part.startsWith(`[subpart]${selectedBottomReference}`);
+          const hasIndependentColor = !part.includes('#');
+          selectedBottom.slice(
+            selectedBottom.indexOf('{') + 1,
+            selectedBottom.indexOf('}')
+          );
+          let isBottomSubPart = false;
+          let isTopSubPart = false;
+  
+          if (selectedBottom.indexOf('{') > 0) {
+            part.startsWith(
+              `[bottom](${selectedBottom.slice(
+                selectedBottom.indexOf('{') + 1,
+                selectedBottom.indexOf('}')
+              )})`
+            );
+          }
+  
+          if (selectedTop.indexOf('{') > 0) {
+            isTopSubPart = part.startsWith(
+              `[top](${selectedTop.slice(
+                selectedTop.indexOf('{') + 1,
+                selectedTop.indexOf('}')
+              )})`
+            );
+          }
+  
+          return (
+            (isPart || isBottomSubPart || isTopSubPart || isSubNode) &&
+            hasIndependentColor
           );
         }
-
-        if (selectedTop.indexOf('{') > 0) {
-          isTopSubPart = part.startsWith(
-            `[top](${selectedTop.slice(
-              selectedTop.indexOf('{') + 1,
-              selectedTop.indexOf('}')
-            )})`
-          );
-        }
-
-        return (
-          (isPart || isBottomSubPart || isTopSubPart || isSubNode) &&
-          hasIndependentColor
-        );
-      }
-    ).filter((part) => {
-      const topRegex = /^\[top\]/;
-      const subpartTopRegex = /^\[subpart\]\[top\]/;
-      const bottomRegex = /^\[bottom\]/;
-      const subpartBottomRegex = /^\[subpart\]\[bottom\]/;
-      if(partsToShow === 'both') return true;
-      if(partsToShow === 'top') return (topRegex.test(part) || subpartTopRegex.test(part))
-      if(partsToShow === 'bottom') return (bottomRegex.test(part) || subpartBottomRegex.test(part))
-    });
-
-    const allColorsSelected = selectedPartsWithIndependentMaterials.every(
-      (part) => materialsStore.state[part] !== null
-    );
-
-    if (!allColorsSelected) {
-      const notSelectedMaterialParts =
-        selectedPartsWithIndependentMaterials.filter(
-          (part) => materialsStore.state[part] === null
-        );
-      const realNames = notSelectedMaterialParts.map(
-        (part) => partNamesReference[skuReference[sku].solution3DID][part]
-      );
-      notAllMaterialsSelected(realNames);
-      return;
-    }
-
-    const mappedSelectedPartsWithIndependentMaterials =
-      selectedPartsWithIndependentMaterials.map((part) => {
-        const { solution3DID: id } = skuReference[sku];
-
-        const material = materialsStore.state[part];
-        try {
-          return {
-            part: partNamesReference[skuReference[sku].solution3DID][part],
-            material:
-              material.slice(0, material.indexOf('|')).trim().toLowerCase() ||
-              '',
-          };
-        } catch (error) {
-          return part;
-        }
-      })
-
-    const selectedPartsWithDependentMaterials = threedium.parts
-      .filter((part) => {
-        const hasTag = part.includes('#') && part.includes('$');
-        if (!hasTag) return false;
-
-        const dependentFromReference = part.slice(
-          part.indexOf('#') + 1,
-          part.indexOf('$')
-        );
-
-        const isPart = selectedTop === part || selectedBottom === part;
-
-        const isDependent =
-          selectedTop.startsWith(dependentFromReference) ||
-          selectedBottom.startsWith(dependentFromReference);
-
-        const isSubPart =
-          part.startsWith(
-            `[subpart]${selectedTop.slice(
-              selectedTop.indexOf('['),
-              selectedTop.indexOf(')') + 1
-            )}`
-          ) ||
-          part.startsWith(
-            `[subpart]${selectedBottom.slice(
-              selectedBottom.indexOf('['),
-              selectedBottom.indexOf(')') + 1
-            )}`
-          );
-
-        const topSubPartNumber = selectedTop.slice(
-          selectedTop.indexOf('{') + 1,
-          selectedTop.indexOf('}')
-        );
-        const bottomSubPartNumber = selectedBottom.slice(
-          selectedBottom.indexOf('{') + 1,
-          selectedBottom.indexOf('}')
-        );
-        const isSubPartFromSubPart =
-          part.startsWith(`[subpart][top](${topSubPartNumber})`) ||
-          part.startsWith(`[subpart][bottom](${bottomSubPartNumber})`);
-
-        const isDependentFromSubPart =
-          dependentFromReference.startsWith(`[top](${topSubPartNumber})`) ||
-          dependentFromReference.startsWith(`[bottom](${bottomSubPartNumber})`);
-
-        return (
-          (isPart || isSubPart || isSubPartFromSubPart) &&
-          (isDependentFromSubPart || isDependent)
-        );
-      }).filter((part) => {
+      ).filter((part) => {
         const topRegex = /^\[top\]/;
         const subpartTopRegex = /^\[subpart\]\[top\]/;
         const bottomRegex = /^\[bottom\]/;
@@ -495,27 +402,126 @@ window.onload = async () => {
         if(partsToShow === 'both') return true;
         if(partsToShow === 'top') return (topRegex.test(part) || subpartTopRegex.test(part))
         if(partsToShow === 'bottom') return (bottomRegex.test(part) || subpartBottomRegex.test(part))
-      })
-      .map((part) => {
-        const reference = part.slice(part.indexOf('#') + 1, part.indexOf('$'));
-        const dependentFromPart = threedium.parts.find((p) =>
-          p.startsWith(reference)
-        );
-        const material = materialsStore.state[dependentFromPart];
-
-        return {
-          part: partNamesReference[skuReference[sku].solution3DID][part],
-          material: material
-            .slice(0, material.indexOf('|'))
-            .trim()
-            .toLowerCase(),
-        };
       });
+  
+      const allColorsSelected = selectedPartsWithIndependentMaterials.every(
+        (part) => materialsStore.state[part] !== null
+      );
+  
+      if (!allColorsSelected) {
+        const notSelectedMaterialParts =
+          selectedPartsWithIndependentMaterials.filter(
+            (part) => materialsStore.state[part] === null
+          );
+        const realNames = notSelectedMaterialParts.map(
+          (part) => partNamesReference[skuReference[sku].solution3DID][part]
+        );
+        notAllMaterialsSelected(realNames);
+        return;
+      }
+  
+      const mappedSelectedPartsWithIndependentMaterials =
+        selectedPartsWithIndependentMaterials.map((part) => {
+          const { solution3DID: id } = skuReference[sku];
+  
+          const material = materialsStore.state[part];
+          try {
+            return {
+              part: partNamesReference[skuReference[sku].solution3DID][part],
+              material:
+                material.slice(0, material.indexOf('|')).trim().toLowerCase() ||
+                '',
+            };
+          } catch (error) {
+            return part;
+          }
+        })
+  
+      const selectedPartsWithDependentMaterials = threedium.parts
+        .filter((part) => {
+          const hasTag = part.includes('#') && part.includes('$');
+          if (!hasTag) return false;
+  
+          const dependentFromReference = part.slice(
+            part.indexOf('#') + 1,
+            part.indexOf('$')
+          );
+  
+          const isPart = selectedTop === part || selectedBottom === part;
+  
+          const isDependent =
+            selectedTop.startsWith(dependentFromReference) ||
+            selectedBottom.startsWith(dependentFromReference);
+  
+          const isSubPart =
+            part.startsWith(
+              `[subpart]${selectedTop.slice(
+                selectedTop.indexOf('['),
+                selectedTop.indexOf(')') + 1
+              )}`
+            ) ||
+            part.startsWith(
+              `[subpart]${selectedBottom.slice(
+                selectedBottom.indexOf('['),
+                selectedBottom.indexOf(')') + 1
+              )}`
+            );
+  
+          const topSubPartNumber = selectedTop.slice(
+            selectedTop.indexOf('{') + 1,
+            selectedTop.indexOf('}')
+          );
+          const bottomSubPartNumber = selectedBottom.slice(
+            selectedBottom.indexOf('{') + 1,
+            selectedBottom.indexOf('}')
+          );
+          const isSubPartFromSubPart =
+            part.startsWith(`[subpart][top](${topSubPartNumber})`) ||
+            part.startsWith(`[subpart][bottom](${bottomSubPartNumber})`);
+  
+          const isDependentFromSubPart =
+            dependentFromReference.startsWith(`[top](${topSubPartNumber})`) ||
+            dependentFromReference.startsWith(`[bottom](${bottomSubPartNumber})`);
+  
+          return (
+            (isPart || isSubPart || isSubPartFromSubPart) &&
+            (isDependentFromSubPart || isDependent)
+          );
+        }).filter((part) => {
+          const topRegex = /^\[top\]/;
+          const subpartTopRegex = /^\[subpart\]\[top\]/;
+          const bottomRegex = /^\[bottom\]/;
+          const subpartBottomRegex = /^\[subpart\]\[bottom\]/;
+          if(partsToShow === 'both') return true;
+          if(partsToShow === 'top') return (topRegex.test(part) || subpartTopRegex.test(part))
+          if(partsToShow === 'bottom') return (bottomRegex.test(part) || subpartBottomRegex.test(part))
+        })
+        .map((part) => {
+          const reference = part.slice(part.indexOf('#') + 1, part.indexOf('$'));
+          const dependentFromPart = threedium.parts.find((p) =>
+            p.startsWith(reference)
+          );
+          const material = materialsStore.state[dependentFromPart];
+  
+          return {
+            part: partNamesReference[skuReference[sku].solution3DID][part],
+            material: material
+              .slice(0, material.indexOf('|'))
+              .trim()
+              .toLowerCase(),
+          };
+        });
+  
+      const partsToSave = [
+        ...mappedSelectedPartsWithIndependentMaterials,
+        ...selectedPartsWithDependentMaterials,
+      ];
+      return partsToSave
+  } 
 
-    const partsToSave = [
-      ...mappedSelectedPartsWithIndependentMaterials,
-      ...selectedPartsWithDependentMaterials,
-    ];
+
+  saveButton.addEventListener('click', async () => { 
+    const partsToSave = await getPartsToSave();
     console.log(partsToSave);
     await new Promise((resolve, reject) => {
       Unlimited3D.setCameraPosition(
